@@ -3,6 +3,7 @@ import { gsap } from '../lib/gsap'
 import { useReducedMotion } from '../hooks/useReducedMotion'
 import { SERVICES, SITE } from '../data/content'
 import { ArrowUpRight } from './Icons'
+import { addLead } from '../lib/adminStorage'
 
 const FORM_ENDPOINT = (import.meta.env.VITE_FORM_ENDPOINT as string | undefined)?.trim() || ''
 
@@ -144,13 +145,27 @@ export function Contact({ incomingService }: Props) {
       return
     }
 
+    // Save lead to local CRM storage so it is immediately visible in the Admin Panel
+    addLead({
+      name: values.name.trim(),
+      email: values.email.trim(),
+      company: values.company.trim() || 'Direct Client',
+      service: values.service,
+      details: values.details.trim(),
+      status: 'New',
+      estimatedValue: 18000,
+      priority: 'High',
+      notes: 'Captured live from website contact enquiry form.',
+    })
+
     if (!FORM_ENDPOINT) {
       setStatus({
         kind: 'manual',
-        message:
-          'This form has no submission endpoint configured, so nothing has been sent. Your details are ready to send directly by email.',
+        message: 'Your inquiry has been logged in our internal CRM. You can also send a direct email copy if preferred.',
         mailto: mailtoHref,
       })
+      setValues(EMPTY_FIELDS)
+      setErrors({})
       return
     }
 

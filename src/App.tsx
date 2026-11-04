@@ -10,14 +10,29 @@ import { Insights } from './components/Insights'
 import { Contact } from './components/Contact'
 import { Footer } from './components/Footer'
 import { CustomCursor } from './components/CustomCursor'
+import { AdminPanel } from './components/admin/AdminPanel'
+import { useIsAdmin } from './lib/router'
 import { initSmoothScroll, scrollToId } from './lib/scroll'
 import { ScrollTrigger } from './lib/gsap'
 
 export default function App() {
+  const isAdmin = useIsAdmin()
   const [ready, setReady] = useState(false)
   const [incomingService, setIncomingService] = useState('')
 
   useEffect(() => {
+    if (isAdmin) {
+      document.documentElement.classList.remove('has-custom-cursor')
+      const loader = document.getElementById('loader')
+      if (loader) {
+        loader.classList.add('is-done')
+        window.setTimeout(() => loader.remove(), 400)
+      }
+      document.documentElement.classList.add('is-ready')
+      setReady(true)
+      return
+    }
+
     const cleanupScroll = initSmoothScroll()
 
     let cancelled = false
@@ -57,9 +72,11 @@ export default function App() {
       window.removeEventListener('load', onLoad)
       cleanupScroll()
     }
-  }, [])
+  }, [isAdmin])
 
   useEffect(() => {
+    if (isAdmin) return
+
     const onClick = (event: MouseEvent) => {
       const target = event.target as Element | null
       const anchor = target?.closest<HTMLAnchorElement>('a[href^="#"]')
@@ -77,11 +94,15 @@ export default function App() {
 
     document.addEventListener('click', onClick)
     return () => document.removeEventListener('click', onClick)
-  }, [])
+  }, [isAdmin])
 
   const handleSelectService = (service: string) => {
     setIncomingService(service)
     window.setTimeout(() => scrollToId('contact'), 80)
+  }
+
+  if (isAdmin) {
+    return <AdminPanel />
   }
 
   return (
