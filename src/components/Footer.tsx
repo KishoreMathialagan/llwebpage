@@ -1,8 +1,37 @@
+import { useRef, useEffect } from 'react'
 import { NAV_ITEMS, SITE } from '../data/content'
 import { ArrowUpRight } from './Icons'
 import { scrollToId } from '../lib/scroll'
+import { useReducedMotion } from '../hooks/useReducedMotion'
 
 export function Footer() {
+  const brandRef = useRef<HTMLDivElement>(null)
+  const reduced = useReducedMotion()
+
+  useEffect(() => {
+    if (reduced || !brandRef.current) return
+    const el = brandRef.current
+
+    const onPointerMove = (e: MouseEvent) => {
+      const rect = el.getBoundingClientRect()
+      const x = (e.clientX - rect.left) / rect.width - 0.5
+      const y = (e.clientY - rect.top) / rect.height - 0.5
+      el.style.transform = `translate3d(${x * 12}px, ${y * 8}px, 0)`
+    }
+
+    const onPointerLeave = () => {
+      el.style.transform = 'translate3d(0, 0, 0)'
+    }
+
+    el.addEventListener('mousemove', onPointerMove, { passive: true })
+    el.addEventListener('mouseleave', onPointerLeave)
+
+    return () => {
+      el.removeEventListener('mousemove', onPointerMove)
+      el.removeEventListener('mouseleave', onPointerLeave)
+    }
+  }, [reduced])
+
   return (
     <footer className="footer">
       <div className="shell">
@@ -45,12 +74,12 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="footer-brand" aria-hidden="true">
-          <span>LeadLoom</span>
+        <div className="footer-brand" ref={brandRef} aria-hidden="true">
+          <span className="footer-brand-text">LeadLoom</span>
           <svg className="footer-brand-mark" viewBox="0 0 120 80" fill="none">
-            <ellipse cx="60" cy="40" rx="56" ry="22" transform="rotate(-24 60 40)" stroke="rgba(214,243,106,.55)" />
-            <ellipse cx="60" cy="40" rx="56" ry="22" transform="rotate(34 60 40)" stroke="rgba(243,241,233,.22)" />
-            <circle cx="106" cy="17" r="4" fill="#D6F36A" />
+            <ellipse cx="60" cy="40" rx="56" ry="22" transform="rotate(-24 60 40)" stroke="rgba(214,243,106,.65)" strokeWidth="1.2" />
+            <ellipse cx="60" cy="40" rx="56" ry="22" transform="rotate(34 60 40)" stroke="rgba(243,241,233,.26)" />
+            <circle cx="106" cy="17" r="4.5" fill="#D6F36A" />
           </svg>
         </div>
 

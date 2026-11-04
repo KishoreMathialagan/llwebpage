@@ -22,13 +22,13 @@ export function CentralSculpture({ reduced, detail }: Props) {
 const shardMaterial = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: new THREE.Color('#b9bcb1'),
-        metalness: 1,
-        roughness: 0.18,
-        envMapIntensity: 1.1,
-      }),
-    [],
-  )
+        color: new THREE.Color('#d2d5cc'),
+    metalness: 0.98,
+    roughness: 0.14,
+    envMapIntensity: 1.4,
+  }),
+  [],
+)
 
   useEffect(() => {
     return () => {
@@ -38,7 +38,7 @@ const shardMaterial = useMemo(
   }, [shardGeometry, shardMaterial])
 
   const shardData = useMemo(() => {
-    const count = detail === 'full' ? 13 : 7
+    const count = detail === 'full' ? 14 : 8
     return Array.from({ length: count }, (_, i) => {
       const angle = (i / count) * Math.PI * 2 + i * 0.37
       const radius = 2.45 + (i % 4) * 0.28
@@ -58,99 +58,99 @@ const shardMaterial = useMemo(
     if (reduced) return
     const t = state.clock.elapsedTime
     if (spin.current) {
-      spin.current.rotation.y = t * 0.055
-      spin.current.rotation.x = Math.sin(t * 0.07) * 0.055
+      spin.current.rotation.y = t * 0.052
+      spin.current.rotation.x = Math.sin(t * 0.065) * 0.055
     }
     if (shards.current) {
-      shards.current.rotation.y = -t * 0.032
-      shards.current.rotation.z = Math.sin(t * 0.06) * 0.04
+      shards.current.rotation.y = -t * 0.03
+      shards.current.rotation.z = Math.sin(t * 0.055) * 0.04
     }
   })
 
   return (
     <group>
       <group ref={spin}>
-        {/* Organic chrome knot */}
+        {/* Organic chrome knot — fluid sculptural heart */}
         <mesh rotation={[0.28, 0.1, 0.42]} castShadow>
-          <torusKnotGeometry args={[1.12, 0.195, 220, 28, 2, 3]} />
+          <torusKnotGeometry args={[1.14, 0.198, 240, 32, 2, 3]} />
           <meshStandardMaterial
-            color="#a3a69c"
-            metalness={1}
-            roughness={0.18}
-            envMapIntensity={1.5}
+            color="#c4c7be"
+            metalness={0.98}
+            roughness={0.12}
+            envMapIntensity={1.85}
           />
         </mesh>
 
-        {/* A single bright thread following the same path */}
-        <mesh rotation={[0.28, 0.1, 0.42]} scale={1.045}>
-          <torusKnotGeometry args={[1.12, 0.012, 240, 6, 2, 3]} />
-          <meshBasicMaterial color="#eef7c4" toneMapped={false} transparent opacity={0.55} />
+        {/* Luminous orbital neon thread following knot contours */}
+        <mesh rotation={[0.28, 0.1, 0.42]} scale={1.04}>
+          <torusKnotGeometry args={[1.14, 0.012, 260, 8, 2, 3]} />
+          <meshBasicMaterial color="#eef8c6" toneMapped={false} transparent opacity={0.65} />
         </mesh>
 
-        {/* Dark core */}
+        {/* Dark faceted core */}
         <mesh rotation={[0.4, 0.2, 0.1]}>
-          <icosahedronGeometry args={[0.58, 1]} />
+          <icosahedronGeometry args={[0.6, 1]} />
           <meshStandardMaterial
-            color="#2a2d26"
-            metalness={0.92}
-            roughness={0.42}
-            envMapIntensity={1.1}
+            color="#20221e"
+            metalness={0.95}
+            roughness={0.36}
+            envMapIntensity={1.2}
           />
         </mesh>
 
-        {/* Internal orbit */}
+        {/* Precision internal orbit ring */}
         <mesh rotation={[Math.PI / 2.15, 0.18, 0.2]}>
-          <torusGeometry args={[1.86, 0.006, 8, 220]} />
-          <meshBasicMaterial color="#d6f36a" toneMapped={false} transparent opacity={0.8} />
+          <torusGeometry args={[1.88, 0.007, 8, 240]} />
+          <meshBasicMaterial color="#d6f36a" toneMapped={false} transparent opacity={0.85} />
         </mesh>
 
-        {/* Architectural loom arcs */}
+        {/* Architectural loom arcs — structural tension */}
         <mesh rotation={[0.6, 0.25, 1.02]}>
-          <torusGeometry args={[2.02, 0.022, 10, 180, Math.PI * 1.35]} />
+          <torusGeometry args={[2.04, 0.022, 12, 190, Math.PI * 1.35]} />
           <meshStandardMaterial
-            color="#767a70"
-            metalness={1}
-            roughness={0.34}
-            envMapIntensity={1.3}
+            color="#8c9086"
+            metalness={0.98}
+            roughness={0.24}
+            envMapIntensity={1.5}
             side={THREE.DoubleSide}
           />
         </mesh>
         <mesh rotation={[1.75, 0.55, 0.35]}>
-          <torusGeometry args={[2.18, 0.014, 8, 180, Math.PI * 1.1]} />
+          <torusGeometry args={[2.2, 0.015, 10, 190, Math.PI * 1.1]} />
           <meshStandardMaterial
-            color="#5c6057"
-            metalness={1}
-            roughness={0.4}
-            envMapIntensity={1.15}
+            color="#6b6f65"
+            metalness={0.96}
+            roughness={0.32}
+            envMapIntensity={1.3}
             side={THREE.DoubleSide}
           />
         </mesh>
         <mesh rotation={[0.15, 1.15, 2.1]}>
-          <torusGeometry args={[1.72, 0.012, 8, 180, Math.PI * 0.9]} />
+          <torusGeometry args={[1.74, 0.012, 8, 190, Math.PI * 0.92]} />
           <meshStandardMaterial
-            color="#d0d2c8"
-            metalness={1}
-            roughness={0.18}
-            envMapIntensity={1.6}
+            color="#e2e4dc"
+            metalness={0.98}
+            roughness={0.14}
+            envMapIntensity={1.75}
             side={THREE.DoubleSide}
           />
         </mesh>
 
-        {/* Blades */}
-        <RoundedBox args={[3.25, 0.028, 0.38]} radius={0.012} smoothness={2} rotation={[0, 0, 0.32]}>
+        {/* Minimal architectural blades */}
+        <RoundedBox args={[3.3, 0.026, 0.38]} radius={0.012} smoothness={2} rotation={[0, 0, 0.32]}>
           <meshStandardMaterial
-            color="#3c4038"
-            metalness={0.95}
-            roughness={0.3}
-            envMapIntensity={1.2}
+            color="#464b41"
+            metalness={0.96}
+            roughness={0.25}
+            envMapIntensity={1.35}
           />
         </RoundedBox>
-        <RoundedBox args={[2.7, 0.024, 0.3]} radius={0.01} smoothness={2} rotation={[0, 0, 1.42]}>
+        <RoundedBox args={[2.75, 0.022, 0.3]} radius={0.01} smoothness={2} rotation={[0, 0, 1.42]}>
           <meshStandardMaterial
-            color="#62665c"
-            metalness={1}
-            roughness={0.28}
-            envMapIntensity={1.35}
+            color="#787d72"
+            metalness={0.98}
+            roughness={0.22}
+            envMapIntensity={1.5}
           />
         </RoundedBox>
       </group>

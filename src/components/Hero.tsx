@@ -26,11 +26,33 @@ export function Hero({ ready }: { ready: boolean }) {
 
       const timeline = gsap.timeline({ defaults: { ease: 'power3.out' } })
       timeline
-        .from('.hero-label', { opacity: 0, y: 14, duration: 0.8 }, 0)
-        .from('.hero-title .line-inner', { yPercent: 114, duration: 1.15, stagger: 0.085 }, 0.08)
-        .from('.hero-title .hero-period', { opacity: 0, duration: 0.5 }, 0.95)
-        .from('.hero-bottom .hero-reveal', { opacity: 0, y: 20, duration: 0.9, stagger: 0.09 }, 0.55)
-        .from('.hero-side, .hero-scroll, .hero-meta-line', { opacity: 0, duration: 1 }, 0.85)
+        // 1. Background atmospheric glow & grid reveal
+        .fromTo('.hero-atmosphere', { opacity: 0 }, { opacity: 1, duration: 1.2 }, 0)
+        // 2. Main typography reveals through controlled mask animation
+        .fromTo(
+          '.hero-title .line-inner',
+          { yPercent: 118, opacity: 0 },
+          { yPercent: 0, opacity: 1, duration: 1.25, stagger: 0.1, ease: 'power3.out' },
+          0.12,
+        )
+        // 3. Highlighted period & topline label enter with slight stagger
+        .fromTo('.hero-label', { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.85 }, 0.45)
+        .fromTo('.hero-topline-right', { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.8 }, 0.55)
+        .fromTo('.hero-title .hero-period', { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.55, ease: 'back.out(1.7)' }, 0.85)
+        // 4. CTA & actions fade and glide into place
+        .fromTo(
+          '.hero-bottom .hero-reveal',
+          { opacity: 0, y: 22 },
+          { opacity: 1, y: 0, duration: 0.95, stagger: 0.12, ease: 'power2.out' },
+          0.65,
+        )
+        // 5 & 6. Supporting layout markers and side signatures settle
+        .fromTo(
+          '.hero-side, .hero-scroll, .hero-meta-line',
+          { opacity: 0 },
+          { opacity: 1, duration: 1.1, stagger: 0.1 },
+          0.9,
+        )
     }, root)
 
     return () => context.revert()

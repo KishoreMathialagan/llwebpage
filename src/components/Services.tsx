@@ -1,8 +1,9 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { gsap } from '../lib/gsap'
 import { useReducedMotion } from '../hooks/useReducedMotion'
 import { SERVICES, type Service } from '../data/content'
 import { ArrowUpRight, SERVICE_GLYPHS } from './Icons'
+import { ServicePreviewArtwork } from './ServicePreview'
 
 type Props = {
   onSelectService: (service: string) => void
@@ -10,16 +11,22 @@ type Props = {
 
 function ServiceRow({
   service,
+  active,
+  onHover,
   onSelect,
 }: {
   service: Service
+  active: boolean
+  onHover: () => void
   onSelect: (service: string) => void
 }) {
   return (
     <button
       type="button"
-      className="service-row"
+      className={`service-row ${active ? 'is-hovered' : ''}`}
       onClick={() => onSelect(service.shortTitle)}
+      onMouseEnter={onHover}
+      onFocus={onHover}
       aria-label={`${service.title}. Start a conversation about this service.`}
     >
       <span className="service-number" aria-hidden="true">{service.index}</span>
@@ -54,6 +61,7 @@ function ServiceRow({
 export function Services({ onSelectService }: Props) {
   const root = useRef<HTMLElement>(null)
   const reduced = useReducedMotion()
+  const [activeService, setActiveService] = useState<Service>(SERVICES[0])
 
   useEffect(() => {
     if (!root.current || reduced) return
@@ -75,8 +83,8 @@ export function Services({ onSelectService }: Props) {
       gsap.from('.service-row', {
         opacity: 0,
         y: 22,
-        duration: 0.7,
-        stagger: 0.055,
+        duration: 0.75,
+        stagger: 0.07,
         ease: 'power2.out',
         scrollTrigger: { trigger: '.services-list', start: 'top 86%' },
       })
@@ -100,15 +108,28 @@ export function Services({ onSelectService }: Props) {
             <span className="line"><span className="line-inner">Everything your brand</span></span>
             <span className="line"><span className="line-inner">needs to move <em>forward.</em></span></span>
           </h2>
-          <p className="services-intro">
-            From the first impression to the final conversion, we connect every part of your digital
-            presence into a purposeful growth strategy.
-          </p>
+          <div className="services-head-right">
+            <p className="services-intro">
+              From the first impression to the final conversion, we connect every part of your digital
+              presence into a purposeful growth strategy.
+            </p>
+            {/* Visual interactive preview anchor */}
+            <div className="service-ambient-preview" aria-hidden="true">
+              <span className="service-preview-tag">Capability Model / {activeService.index}</span>
+              <ServicePreviewArtwork glyph={activeService.glyph} active={true} />
+            </div>
+          </div>
         </header>
 
-        <div className="services-list">
+        <div className="services-list" onMouseLeave={() => setActiveService(SERVICES[0])}>
           {SERVICES.map((service) => (
-            <ServiceRow key={service.index} service={service} onSelect={onSelectService} />
+            <ServiceRow
+              key={service.index}
+              service={service}
+              active={activeService.index === service.index}
+              onHover={() => setActiveService(service)}
+              onSelect={onSelectService}
+            />
           ))}
         </div>
 

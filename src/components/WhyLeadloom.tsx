@@ -23,14 +23,28 @@ export function WhyLeadloom() {
         duration: 0.9,
         scrollTrigger: { trigger: '.why-head', start: 'top 74%' },
       })
-      gsap.from('.why-item', {
-        opacity: 0,
-        x: (index) => (index % 2 === 0 ? -18 : 18),
-        duration: 0.85,
-        stagger: 0.09,
-        ease: 'power2.out',
-        scrollTrigger: { trigger: '.why-list', start: 'top 82%' },
+
+      // Progressive vertical storytelling sequence
+      const items = gsap.utils.toArray<HTMLElement>('.why-item')
+      items.forEach((item) => {
+        gsap.fromTo(
+          item,
+          { opacity: 0.35, y: 16 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.6,
+            scrollTrigger: {
+              trigger: item,
+              start: 'top 78%',
+              end: 'bottom 40%',
+              toggleActions: 'play reverse play reverse',
+              toggleClass: { targets: item, className: 'is-active-step' },
+            },
+          },
+        )
       })
+
       gsap.from('.why-quote', {
         opacity: 0,
         y: 24,

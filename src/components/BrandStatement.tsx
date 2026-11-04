@@ -49,7 +49,7 @@ export function BrandStatement() {
     }
   }, [reduced])
 
-  const strip = [...EXPERTISE_STRIP, ...EXPERTISE_STRIP]
+  const strip = [...EXPERTISE_STRIP, ...EXPERTISE_STRIP, ...EXPERTISE_STRIP, ...EXPERTISE_STRIP]
 
   return (
     <section className="statement section" id="about" ref={root} aria-labelledby="statement-title">
