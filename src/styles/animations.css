@@ -1,0 +1,91 @@
+/* --------------------------------------------------------------------------
+   Motion details
+--------------------------------------------------------------------------- */
+
+.hero-scroll-track i {
+  animation: scrollCue 2.6s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+@keyframes scrollCue {
+  0% {
+    transform: translateX(-110%);
+    opacity: 0;
+  }
+  18% {
+    opacity: 1;
+  }
+  72% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(290%);
+    opacity: 0;
+  }
+}
+
+.status-dot {
+  animation: statusPulse 3.4s ease-in-out infinite;
+}
+
+@keyframes statusPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 3px rgba(214, 243, 106, 0.08), 0 0 10px rgba(214, 243, 106, 0.22);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(214, 243, 106, 0.12), 0 0 18px rgba(214, 243, 106, 0.5);
+  }
+}
+
+.contact-orbits {
+  animation: atmosphereDrift 18s ease-in-out infinite;
+}
+
+@keyframes atmosphereDrift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(-14px, 12px, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .expertise-track {
+    animation: none;
+    transform: none;
+  }
+
+  .contact-orbits {
+    animation: none;
+  }
+
+  .hero-scroll-track i {
+    animation: none;
+    width: 100%;
+    opacity: 1;
+  }
+
+  .service-row::before,
+  .service-row::after {
+    transition: none;
+  }
+
+  .project-visual-inner {
+    transition: none;
+  }
+}
