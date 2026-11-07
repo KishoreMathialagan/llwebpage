@@ -13,6 +13,13 @@ export function initSmoothScroll() {
     wheelMultiplier: 0.95,
     touchMultiplier: 1.4,
     smoothWheel: true,
+    prevent: (node) => {
+      return (
+        node instanceof HTMLElement &&
+        (node.hasAttribute('data-lenis-prevent') ||
+          node.closest?.('[data-lenis-prevent], .drawer, .drawer-panel, .drawer-content') !== null)
+      )
+    },
   })
 
   const onScroll = () => ScrollTrigger.update()

@@ -11,99 +11,221 @@ export function Process() {
   const reduced = useReducedMotion()
 
   useEffect(() => {
-    if (!root.current || !track.current || reduced) return
+    if (!root.current || !track.current) return
+
+    // Accessibility: graceful static fallback if prefers-reduced-motion is enabled
+    if (reduced) {
+      const stepEls = root.current.querySelectorAll<HTMLElement>('.process-step')
+      stepEls.forEach((el) => {
+        el.classList.add('is-active', 'is-passed')
+        el.classList.remove('is-inactive')
+      })
+      if (fill.current) fill.current.style.transform = 'none'
+      if (dot.current) dot.current.style.display = 'none'
+      return
+    }
 
     const context = gsap.context(() => {
+      // 1. Entrance reveal for section header when scrolling toward section
       gsap.from('.process-title .line-inner', {
         yPercent: 112,
         duration: 1.05,
         stagger: 0.08,
         ease: 'power3.out',
-        scrollTrigger: { trigger: '.process-head', start: 'top 80%' },
-      })
-
-      gsap.from('.process-step', {
-        opacity: 0,
-        y: 20,
-        duration: 0.8,
-        stagger: 0.08,
-        ease: 'power2.out',
-        scrollTrigger: { trigger: '.process-track', start: 'top 84%' },
+        scrollTrigger: {
+          trigger: root.current,
+          start: 'top 85%',
+        },
       })
 
       const matchMedia = gsap.matchMedia()
 
+      // Dynamic navbar height calculation
+      const getNavHeight = (fallback: number) => {
+        const nav = document.querySelector<HTMLElement>('.site-nav')
+        return nav ? nav.offsetHeight : fallback
+      }
+
+      // ======================================================================
+      // DESKTOP & TABLET (Horizontal pinned timeline)
+      // ======================================================================
       matchMedia.add('(min-width: 900px)', () => {
         const line = track.current?.querySelector<HTMLElement>('.process-line')
-        if (!line || !fill.current || !dot.current) return
-        const distance = () => Math.max(0, line.offsetWidth - 10)
+        const steps = Array.from(track.current?.querySelectorAll<HTMLElement>('.process-step') || [])
+        if (!line || !fill.current || !dot.current || steps.length < 4 || !root.current) return
 
-        gsap.fromTo(
+        const getDistance = () => Math.max(0, line.offsetWidth - 10)
+        // Scroll distance calculated dynamically based on available viewport height for 4 distinct stages
+        const getPinDistance = () => Math.round(window.innerHeight * 1.5)
+
+        // Calculate exact stage collision thresholds based on pixel offset of each step relative to track
+        const getThresholds = () => {
+          const dist = getDistance()
+          if (dist <= 0) return [0, 0.28, 0.56, 0.84]
+          const base = steps[0].offsetLeft
+          return steps.map((s, i) => {
+            if (i === 0) return 0
+            const offset = s.offsetLeft - base
+            return Math.min(0.96, Math.max(0.08, offset / dist))
+          })
+        }
+
+        let thresholds = getThresholds()
+
+        const updateActiveStages = (progress: number) => {
+          let activeIndex = 0
+          for (let i = thresholds.length - 1; i >= 0; i--) {
+            // Buffer to trigger slightly before/as the dot touches the step dot
+            if (progress >= thresholds[i] - 0.015) {
+              activeIndex = i
+              break
+            }
+          }
+
+          steps.forEach((el, i) => {
+            el.style.opacity = ''
+            if (i === activeIndex) {
+              el.classList.add('is-active', 'is-passed')
+              el.classList.remove('is-inactive')
+            } else if (i < activeIndex) {
+              el.classList.remove('is-active', 'is-inactive')
+              el.classList.add('is-passed')
+            } else {
+              el.classList.remove('is-active', 'is-passed')
+              el.classList.add('is-inactive')
+            }
+          })
+        }
+
+        // Initialize Stage 01 as active
+        updateActiveStages(0)
+
+        // Master timeline with ScrollTrigger pinning directly below the fixed navbar
+        const masterTl = gsap.timeline({
+          scrollTrigger: {
+            trigger: root.current,
+            pin: true,
+            start: () => `top ${getNavHeight(76)}px`,
+            end: () => `+=${getPinDistance()}`,
+            scrub: 1,
+            anticipatePin: 1,
+            invalidateOnRefresh: true,
+            onRefresh: () => {
+              thresholds = getThresholds()
+            },
+            onUpdate: (self) => {
+              updateActiveStages(self.progress)
+            },
+            onLeave: () => {
+              updateActiveStages(1)
+            },
+            onLeaveBack: () => {
+              updateActiveStages(0)
+            },
+          },
+        })
+
+        masterTl.fromTo(
           fill.current,
           { scaleX: 0 },
-          {
-            scaleX: 1,
-            ease: 'none',
-            scrollTrigger: {
-              trigger: track.current,
-              start: 'top 72%',
-              end: 'bottom 62%',
-              scrub: 0.6,
-              invalidateOnRefresh: true,
-            },
-          },
+          { scaleX: 1, ease: 'none', duration: 1 },
+          0,
         )
-        gsap.fromTo(
+
+        masterTl.fromTo(
           dot.current,
           { x: 0 },
-          {
-            x: distance,
-            ease: 'none',
-            scrollTrigger: {
-              trigger: track.current,
-              start: 'top 72%',
-              end: 'bottom 62%',
-              scrub: 0.6,
-              invalidateOnRefresh: true,
-            },
-          },
+          { x: () => getDistance(), ease: 'none', duration: 1 },
+          0,
         )
       })
 
+      // ======================================================================
+      // MOBILE (Vertical pinned timeline)
+      // ======================================================================
       matchMedia.add('(max-width: 899px)', () => {
         const line = track.current?.querySelector<HTMLElement>('.process-line')
-        if (!line || !fill.current || !dot.current) return
-        const distance = () => Math.max(0, line.offsetHeight - 10)
+        const steps = Array.from(track.current?.querySelectorAll<HTMLElement>('.process-step') || [])
+        if (!line || !fill.current || !dot.current || steps.length < 4 || !root.current) return
 
-        gsap.fromTo(
+        const getDistance = () => Math.max(0, line.offsetHeight - 10)
+        const getPinDistance = () => Math.round(window.innerHeight * 1.25)
+
+        const getThresholds = () => {
+          const dist = getDistance()
+          if (dist <= 0) return [0, 0.28, 0.56, 0.84]
+          const base = steps[0].offsetTop
+          return steps.map((s, i) => {
+            if (i === 0) return 0
+            const offset = s.offsetTop - base
+            return Math.min(0.96, Math.max(0.08, offset / dist))
+          })
+        }
+
+        let thresholds = getThresholds()
+
+        const updateActiveStages = (progress: number) => {
+          let activeIndex = 0
+          for (let i = thresholds.length - 1; i >= 0; i--) {
+            if (progress >= thresholds[i] - 0.015) {
+              activeIndex = i
+              break
+            }
+          }
+
+          steps.forEach((el, i) => {
+            el.style.opacity = ''
+            if (i === activeIndex) {
+              el.classList.add('is-active', 'is-passed')
+              el.classList.remove('is-inactive')
+            } else if (i < activeIndex) {
+              el.classList.remove('is-active', 'is-inactive')
+              el.classList.add('is-passed')
+            } else {
+              el.classList.remove('is-active', 'is-passed')
+              el.classList.add('is-inactive')
+            }
+          })
+        }
+
+        updateActiveStages(0)
+
+        const masterTl = gsap.timeline({
+          scrollTrigger: {
+            trigger: root.current,
+            pin: true,
+            start: () => `top ${getNavHeight(68)}px`,
+            end: () => `+=${getPinDistance()}`,
+            scrub: 1,
+            anticipatePin: 1,
+            invalidateOnRefresh: true,
+            onRefresh: () => {
+              thresholds = getThresholds()
+            },
+            onUpdate: (self) => {
+              updateActiveStages(self.progress)
+            },
+            onLeave: () => {
+              updateActiveStages(1)
+            },
+            onLeaveBack: () => {
+              updateActiveStages(0)
+            },
+          },
+        })
+
+        masterTl.fromTo(
           fill.current,
           { scaleY: 0 },
-          {
-            scaleY: 1,
-            ease: 'none',
-            scrollTrigger: {
-              trigger: track.current,
-              start: 'top 75%',
-              end: 'bottom 68%',
-              scrub: 0.6,
-              invalidateOnRefresh: true,
-            },
-          },
+          { scaleY: 1, ease: 'none', duration: 1 },
+          0,
         )
-        gsap.fromTo(
+
+        masterTl.fromTo(
           dot.current,
           { y: 0 },
-          {
-            y: distance,
-            ease: 'none',
-            scrollTrigger: {
-              trigger: track.current,
-              start: 'top 75%',
-              end: 'bottom 68%',
-              scrub: 0.6,
-              invalidateOnRefresh: true,
-            },
-          },
+          { y: () => getDistance(), ease: 'none', duration: 1 },
+          0,
         )
       })
 

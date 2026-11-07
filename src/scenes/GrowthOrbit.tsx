@@ -32,11 +32,11 @@ export function GrowthOrbit({ reduced }: { reduced: boolean }) {
   const tablet = size.width < 1120
 
   const position: [number, number, number] = mobile
-    ? [0, -0.08, 0]
+    ? [0, -0.06, 0]
     : tablet
-      ? [1.15, 0.24, 0]
-      : [1.62, 0.08, 0]
-  const scale = mobile ? 0.6 : tablet ? 0.8 : 0.94
+      ? [1.05, 0.2, 0]
+      : [1.32, 0.1, 0]
+  const scale = mobile ? 0.62 : tablet ? 0.78 : 0.9
 
   const glowTexture = useMemo(
     () =>

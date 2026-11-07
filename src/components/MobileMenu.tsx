@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { NAV_ITEMS, SITE } from '../data/content'
 import { ArrowUpRight } from './Icons'
+import { Logo } from './Logo'
 import { scrollToId, startScroll, stopScroll } from '../lib/scroll'
 
 type Props = {
@@ -73,14 +74,11 @@ export function MobileMenu({ open, onClose, activeId }: Props) {
       aria-hidden={!open}
     >
       <div className="mobile-menu-panel" ref={panelRef}>
-        <div className="mobile-menu-orbit" aria-hidden="true">
-          <span />
-          <span />
-          <span />
-        </div>
-
-        <div className="mobile-menu-head">
-          <span className="eyebrow">Menu</span>
+        <div className="mobile-menu-head flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <Logo variant="symbol" className="h-5 w-auto" />
+            <span className="eyebrow">Menu</span>
+          </div>
           <span className="mobile-menu-note">Strategy / Creativity / Digital</span>
         </div>
 

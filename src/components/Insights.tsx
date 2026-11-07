@@ -38,6 +38,10 @@ export function Insights() {
     window.setTimeout(() => scrollToId('contact'), 120)
   }
 
+  const currentIndex = selected ? INSIGHTS.findIndex((i) => i.index === selected.index) : -1
+  const prevInsight = currentIndex > 0 ? INSIGHTS[currentIndex - 1] : INSIGHTS[INSIGHTS.length - 1]
+  const nextInsight = currentIndex < INSIGHTS.length - 1 ? INSIGHTS[currentIndex + 1] : INSIGHTS[0]
+
   return (
     <section className="insights section" id="insights" ref={root} aria-labelledby="insights-title">
       <div className="shell">
@@ -92,30 +96,61 @@ export function Insights() {
         open={Boolean(selected)}
         onClose={() => setSelected(null)}
         label={selected ? `Note: ${selected.title}` : 'Note'}
-        className="dialog-insight"
-      >
-        {selected && (
-          <article className="insight-dialog">
-            <div className="insight-dialog-head">
-              <span className="eyebrow">{selected.topic}</span>
-              <span className="insight-dialog-index">Note {selected.index}</span>
-            </div>
-            <h3>{selected.title}</h3>
-            <div className="insight-dialog-body">
-              {selected.excerpt.map((paragraph) => (
-                <p key={paragraph}>{paragraph}</p>
-              ))}
-            </div>
-            <div className="insight-dialog-takeaway">
-              <span className="eyebrow">In short</span>
-              <p>{selected.takeaway}</p>
-            </div>
-            <div className="insight-dialog-actions">
-              <button type="button" className="btn btn-primary" onClick={goToContact} data-cursor="cta">
+        category={selected ? `${selected.topic} / Perspectives` : 'Observation'}
+        className="drawer-insight"
+        footer={
+          selected && (
+            <>
+              <div className="drawer-nav">
+                <button
+                  type="button"
+                  className="drawer-nav-btn"
+                  onClick={() => setSelected(prevInsight)}
+                  aria-label="Previous note"
+                  title="Previous note"
+                >
+                  ←
+                </button>
+                <span className="drawer-index-indicator">Note {selected.index} / 04</span>
+                <button
+                  type="button"
+                  className="drawer-nav-btn"
+                  onClick={() => setSelected(nextInsight)}
+                  aria-label="Next note"
+                  title="Next note"
+                >
+                  →
+                </button>
+              </div>
+
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={goToContact}
+                data-cursor="cta"
+              >
                 <span>Discuss this with us</span>
                 <span className="btn-arrow"><ArrowUpRight /></span>
               </button>
-              <span>LeadLoom / Notes</span>
+            </>
+          )
+        }
+      >
+        {selected && (
+          <article className="insight-drawer-body">
+            <div className="insight-drawer-meta-row">
+              <span className="eyebrow">{selected.topic}</span>
+              <span className="insight-drawer-index-pill">Note {selected.index}</span>
+            </div>
+            <h3 className="insight-drawer-title">{selected.title}</h3>
+            <div className="insight-drawer-paragraphs">
+              {selected.excerpt.map((paragraph, idx) => (
+                <p key={idx}>{paragraph}</p>
+              ))}
+            </div>
+            <div className="insight-drawer-takeaway">
+              <span className="eyebrow">In short</span>
+              <p>{selected.takeaway}</p>
             </div>
           </article>
         )}

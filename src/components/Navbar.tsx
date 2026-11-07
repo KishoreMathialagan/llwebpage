@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { NAV_ITEMS } from '../data/content'
-import { ArrowUpRight, Wordmark } from './Icons'
+import { ArrowUpRight } from './Icons'
+import { Logo } from './Logo'
 import { scrollToId } from '../lib/scroll'
 import { MobileMenu } from './MobileMenu'
 
@@ -60,12 +61,16 @@ export function Navbar({ ready }: Props) {
       <header className={`site-nav ${scrolled ? 'is-scrolled' : ''} ${ready ? 'is-ready' : ''} ${menuOpen ? 'is-menu-open' : ''}`}>
         <div className="nav-shell">
           <a
-            className="nav-brand"
+            className="nav-brand inline-flex items-center"
             href="#top"
-            aria-label="LeadLoom — back to top"
+            aria-label="ANTARA — back to top"
             onClick={(event) => goTo(event, 'top')}
           >
-            <Wordmark />
+            <Logo
+              variant="symbol"
+              className="h-[28px] sm:h-[32px] w-auto transition-transform duration-300 hover:scale-105"
+              title="ANTARA"
+            />
           </a>
 
           <nav className="nav-links" aria-label="Primary">

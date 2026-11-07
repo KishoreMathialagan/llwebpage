@@ -2,12 +2,23 @@ import { useEffect, useRef, useState } from 'react'
 import { gsap } from '../lib/gsap'
 import { useReducedMotion } from '../hooks/useReducedMotion'
 import { PROJECTS, type Project } from '../data/content'
+import { getPublishedCMSProjects, type CMSProject } from '../lib/cmsStorage'
 import { ArrowUpRight } from './Icons'
 import { ProjectArt } from './ProjectArt'
 import { Dialog } from './Dialog'
 import { scrollToId } from '../lib/scroll'
 
-function ProjectCard({ project, onOpen }: { project: Project; onOpen: (project: Project) => void }) {
+type DisplayProject = CMSProject | Project
+
+function ProjectCard({
+  project,
+  onOpen,
+}: {
+  project: DisplayProject
+  onOpen: (project: DisplayProject) => void
+}) {
+  const hasCoverImage = 'coverImage' in project && Boolean(project.coverImage)
+
   return (
     <button
       type="button"
@@ -24,7 +35,15 @@ function ProjectCard({ project, onOpen }: { project: Project; onOpen: (project: 
 
       <span className="project-visual">
         <span className="project-visual-inner">
-          <ProjectArt variant={project.art} />
+          {hasCoverImage ? (
+            <img
+              src={(project as CMSProject).coverImage}
+              alt={(project as CMSProject).imageAlt || project.title}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <ProjectArt variant={project.art} />
+          )}
         </span>
         <span className="project-view" aria-hidden="true">
           <span>View concept</span>
@@ -48,7 +67,25 @@ function ProjectCard({ project, onOpen }: { project: Project; onOpen: (project: 
 export function Portfolio() {
   const root = useRef<HTMLElement>(null)
   const reduced = useReducedMotion()
-  const [selected, setSelected] = useState<Project | null>(null)
+
+  const [projectList, setProjectList] = useState<DisplayProject[]>(() => {
+    const published = getPublishedCMSProjects()
+    return published.length ? published : PROJECTS
+  })
+
+  const [selected, setSelected] = useState<DisplayProject | null>(null)
+
+  // Reactive listener for CMS updates
+  useEffect(() => {
+    const handleCMSChange = () => {
+      const published = getPublishedCMSProjects()
+      const nextList = published.length ? published : PROJECTS
+      setProjectList(nextList)
+    }
+
+    window.addEventListener('leadloom-cms-change', handleCMSChange)
+    return () => window.removeEventListener('leadloom-cms-change', handleCMSChange)
+  }, [])
 
   useEffect(() => {
     if (!root.current || reduced) return
@@ -84,12 +121,19 @@ export function Portfolio() {
     }, root)
 
     return () => context.revert()
-  }, [reduced])
+  }, [reduced, projectList])
 
   const goToContact = () => {
     setSelected(null)
     window.setTimeout(() => scrollToId('contact'), 120)
   }
+
+  const currentIndex = selected ? projectList.findIndex((p) => p.id === selected.id) : -1
+  const prevProject = currentIndex > 0 ? projectList[currentIndex - 1] : projectList[projectList.length - 1]
+  const nextProject = currentIndex < projectList.length - 1 ? projectList[currentIndex + 1] : projectList[0]
+
+  const hasSelectedCover = selected && 'coverImage' in selected && Boolean(selected.coverImage)
+  const selectedCms = selected as CMSProject | null
 
   return (
     <section className="work section" id="work" ref={root} aria-labelledby="work-title">
@@ -117,7 +161,7 @@ export function Portfolio() {
         </header>
 
         <div className="work-grid">
-          {PROJECTS.map((project, index) => (
+          {projectList.map((project, index) => (
             <div className={`work-item work-item-${index + 1}`} key={project.id}>
               <ProjectCard project={project} onOpen={setSelected} />
             </div>
@@ -140,28 +184,91 @@ export function Portfolio() {
         open={Boolean(selected)}
         onClose={() => setSelected(null)}
         label={selected ? `${selected.title} concept details` : 'Concept details'}
-        className="dialog-project"
+        category={selected ? `${selected.category} / Concept Study` : 'Concept details'}
+        className="drawer-project"
+        footer={
+          selected && (
+            <>
+              <div className="drawer-nav">
+                <button
+                  type="button"
+                  className="drawer-nav-btn"
+                  onClick={() => setSelected(prevProject)}
+                  aria-label="Previous concept"
+                  title="Previous concept"
+                >
+                  ←
+                </button>
+                <span className="drawer-index-indicator">{selected.index} / 0{projectList.length}</span>
+                <button
+                  type="button"
+                  className="drawer-nav-btn"
+                  onClick={() => setSelected(nextProject)}
+                  aria-label="Next concept"
+                  title="Next concept"
+                >
+                  →
+                </button>
+              </div>
+
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={goToContact}
+                data-cursor="cta"
+              >
+                <span>Start a project like this</span>
+                <span className="btn-arrow"><ArrowUpRight /></span>
+              </button>
+            </>
+          )
+        }
       >
         {selected && (
-          <div className="project-dialog-inner">
-            <div className="project-dialog-art">
-              <ProjectArt variant={selected.art} />
+          <div className="project-drawer-body">
+            <div className="project-drawer-art">
+              {hasSelectedCover ? (
+                <img
+                  src={(selected as CMSProject).coverImage}
+                  alt={(selected as CMSProject).imageAlt || selected.title}
+                  className="w-full h-auto max-h-[360px] object-cover rounded-md"
+                />
+              ) : (
+                <ProjectArt variant={selected.art} />
+              )}
             </div>
-            <div className="project-dialog-copy">
-              <span className="eyebrow">{selected.category}</span>
-              <h3>{selected.title}</h3>
-              <p className="project-dialog-meta">
-                {selected.industry} <span aria-hidden="true">/</span> {selected.note}
-              </p>
-              <p>{selected.description}</p>
-              <p className="project-dialog-concept">{selected.concept}</p>
-              <div className="project-dialog-actions">
-                <button type="button" className="btn btn-primary" onClick={goToContact} data-cursor="cta">
-                  <span>Start a project like this</span>
-                  <span className="btn-arrow"><ArrowUpRight /></span>
-                </button>
-                <span className="project-dialog-index">{selected.index} / 04</span>
+            <div className="project-drawer-info">
+              <div className="project-drawer-meta-row">
+                <span className="eyebrow">{selected.category}</span>
+                <span className="project-drawer-meta-divider">•</span>
+                <span className="project-drawer-industry">{selected.industry}</span>
               </div>
+              <h3 className="project-drawer-title">{selected.title}</h3>
+              <p className="project-drawer-note">{selected.note}</p>
+              <div className="project-drawer-desc-block">
+                <p className="project-drawer-desc">{selected.description}</p>
+              </div>
+
+              {selected.concept && (
+                <div className="project-drawer-concept">
+                  <span className="eyebrow">Strategic Concept Focus</span>
+                  <p>{selected.concept}</p>
+                </div>
+              )}
+
+              {selectedCms?.challenge && (
+                <div className="project-drawer-concept mt-4">
+                  <span className="eyebrow">The Challenge</span>
+                  <p>{selectedCms.challenge}</p>
+                </div>
+              )}
+
+              {selectedCms?.outcome && (
+                <div className="project-drawer-concept mt-4">
+                  <span className="eyebrow">Outcome & Impact</span>
+                  <p className="text-[#D7F56B]">{selectedCms.outcome}</p>
+                </div>
+              )}
             </div>
           </div>
         )}

@@ -10,6 +10,7 @@ import { Insights } from './components/Insights'
 import { Contact } from './components/Contact'
 import { Footer } from './components/Footer'
 import { CustomCursor } from './components/CustomCursor'
+import { Preloader } from './components/Preloader'
 import { AdminPanel } from './components/admin/AdminPanel'
 import { useIsAdmin } from './lib/router'
 import { initSmoothScroll, scrollToId } from './lib/scroll'
@@ -18,57 +19,26 @@ import { ScrollTrigger } from './lib/gsap'
 export default function App() {
   const isAdmin = useIsAdmin()
   const [ready, setReady] = useState(false)
+  const [preloaderDone, setPreloaderDone] = useState(false)
   const [incomingService, setIncomingService] = useState('')
 
   useEffect(() => {
     if (isAdmin) {
       document.documentElement.classList.remove('has-custom-cursor')
       const loader = document.getElementById('loader')
-      if (loader) {
-        loader.classList.add('is-done')
-        window.setTimeout(() => loader.remove(), 400)
-      }
+      if (loader) loader.remove()
       document.documentElement.classList.add('is-ready')
       setReady(true)
+      setPreloaderDone(true)
       return
     }
 
     const cleanupScroll = initSmoothScroll()
 
-    let cancelled = false
-    const started = performance.now()
-    const minimum = 850
-
-    const finishIntro = () => {
-      if (cancelled) return
-      const wait = Math.max(0, minimum - (performance.now() - started))
-      window.setTimeout(() => {
-        if (cancelled) return
-        const loader = document.getElementById('loader')
-        if (loader) {
-          loader.classList.add('is-done')
-          window.setTimeout(() => loader.remove(), 750)
-        }
-        document.documentElement.classList.add('is-ready')
-        setReady(true)
-        ScrollTrigger.refresh()
-      }, wait)
-    }
-
-    if (document.fonts?.ready) {
-      document.fonts.ready.then(finishIntro).catch(finishIntro)
-    } else {
-      finishIntro()
-    }
-
-    const failsafe = window.setTimeout(finishIntro, 2600)
-
     const onLoad = () => ScrollTrigger.refresh()
     window.addEventListener('load', onLoad)
 
     return () => {
-      cancelled = true
-      window.clearTimeout(failsafe)
       window.removeEventListener('load', onLoad)
       cleanupScroll()
     }
@@ -96,6 +66,17 @@ export default function App() {
     return () => document.removeEventListener('click', onClick)
   }, [isAdmin])
 
+  const handlePreloaderStartExit = () => {
+    document.documentElement.classList.add('is-ready')
+    setReady(true)
+    ScrollTrigger.refresh()
+  }
+
+  const handlePreloaderComplete = () => {
+    setPreloaderDone(true)
+    ScrollTrigger.refresh()
+  }
+
   const handleSelectService = (service: string) => {
     setIncomingService(service)
     window.setTimeout(() => scrollToId('contact'), 80)
@@ -107,6 +88,12 @@ export default function App() {
 
   return (
     <>
+      {!isAdmin && !preloaderDone && (
+        <Preloader
+          onStartExit={handlePreloaderStartExit}
+          onComplete={handlePreloaderComplete}
+        />
+      )}
       <CustomCursor />
       <Navbar ready={ready} />
       <main id="main">

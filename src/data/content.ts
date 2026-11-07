@@ -14,8 +14,8 @@ export const NAV_ITEMS: NavItem[] = [
    Email and phone are intentionally generic placeholders.
 --------------------------------------------------------------------------- */
 export const SITE = {
-  name: 'LeadLoom',
-  email: 'hello@leadloom.com',
+  name: 'ANTARA',
+  email: 'hello@antara.com',
   location: 'Remote-first — working worldwide',
   shortStatement: 'Strategy, creativity and digital thinking for ambitious brands.',
   socials: [

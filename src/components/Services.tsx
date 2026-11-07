@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { gsap } from '../lib/gsap'
+import { gsap, ScrollTrigger } from '../lib/gsap'
 import { useReducedMotion } from '../hooks/useReducedMotion'
 import { SERVICES, type Service } from '../data/content'
+import { getPublishedCMSServices, type CMSService } from '../lib/cmsStorage'
 import { ArrowUpRight, SERVICE_GLYPHS } from './Icons'
-import { ServicePreviewArtwork } from './ServicePreview'
 
 type Props = {
   onSelectService: (service: string) => void
@@ -15,7 +15,7 @@ function ServiceRow({
   onHover,
   onSelect,
 }: {
-  service: Service
+  service: CMSService | Service
   active: boolean
   onHover: () => void
   onSelect: (service: string) => void
@@ -23,7 +23,7 @@ function ServiceRow({
   return (
     <button
       type="button"
-      className={`service-row ${active ? 'is-hovered' : ''}`}
+      className={`service-row ${active ? 'is-active is-hovered' : ''}`}
       onClick={() => onSelect(service.shortTitle)}
       onMouseEnter={onHover}
       onFocus={onHover}
@@ -47,7 +47,7 @@ function ServiceRow({
 
       <span className="service-glyph" aria-hidden="true">
         <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="1.15">
-          {SERVICE_GLYPHS[service.glyph]}
+          {SERVICE_GLYPHS[service.glyph] || SERVICE_GLYPHS.orbit}
         </svg>
       </span>
 
@@ -60,12 +60,35 @@ function ServiceRow({
 
 export function Services({ onSelectService }: Props) {
   const root = useRef<HTMLElement>(null)
+  const listRef = useRef<HTMLDivElement>(null)
   const reduced = useReducedMotion()
-  const [activeService, setActiveService] = useState<Service>(SERVICES[0])
+
+  const [serviceList, setServiceList] = useState<(CMSService | Service)[]>(() => {
+    const published = getPublishedCMSServices()
+    return published.length ? published : SERVICES
+  })
+
+  const [activeService, setActiveService] = useState<CMSService | Service>(serviceList[0] || SERVICES[0])
+  const scrollActiveIndexRef = useRef(0)
+
+  // Reactive listener for CMS updates
+  useEffect(() => {
+    const handleCMSChange = () => {
+      const published = getPublishedCMSServices()
+      const nextList = published.length ? published : SERVICES
+      setServiceList(nextList)
+      setActiveService(nextList[0] || SERVICES[0])
+      ScrollTrigger.refresh()
+    }
+
+    window.addEventListener('leadloom-cms-change', handleCMSChange)
+    return () => window.removeEventListener('leadloom-cms-change', handleCMSChange)
+  }, [])
 
   useEffect(() => {
     if (!root.current || reduced) return
     const context = gsap.context(() => {
+      // 1. Entrance reveals for header
       gsap.from('.services-title .line-inner', {
         yPercent: 112,
         duration: 1.05,
@@ -88,9 +111,72 @@ export function Services({ onSelectService }: Props) {
         ease: 'power2.out',
         scrollTrigger: { trigger: '.services-list', start: 'top 86%' },
       })
+
+      // 2. Natural Scroll-Triggered Sequential Service Activation
+      const listEl = listRef.current
+      if (!listEl) return
+      const rows = Array.from(listEl.querySelectorAll<HTMLElement>('.service-row'))
+      if (rows.length === 0) return
+
+      const setServiceActive = (index: number) => {
+        if (index < 0 || index >= rows.length) return
+        scrollActiveIndexRef.current = index
+        rows.forEach((row, i) => {
+          if (i === index) {
+            row.classList.add('is-active', 'is-hovered')
+          } else {
+            row.classList.remove('is-active', 'is-hovered')
+          }
+        })
+        const target = serviceList[index]
+        if (target) {
+          setActiveService((prev) => (prev.index === target.index ? prev : target))
+        }
+      }
+
+      setServiceActive(0)
+
+      ScrollTrigger.create({
+        trigger: listEl,
+        start: 'top 75%',
+        end: 'bottom 20%',
+        onUpdate: () => {
+          const activationY = window.innerHeight * 0.65
+          const listRect = listEl.getBoundingClientRect()
+
+          if (listRect.top > activationY) {
+            if (scrollActiveIndexRef.current !== 0) {
+              setServiceActive(0)
+            }
+            return
+          }
+
+          let activeIndex = 0
+          for (let i = 0; i < rows.length; i++) {
+            const rect = rows[i].getBoundingClientRect()
+            if (rect.top <= activationY) {
+              activeIndex = i
+            } else {
+              break
+            }
+          }
+
+          if (activeIndex !== scrollActiveIndexRef.current) {
+            setServiceActive(activeIndex)
+          }
+        },
+        onEnter: () => {
+          setServiceActive(0)
+        },
+        onEnterBack: () => {
+          setServiceActive(rows.length - 1)
+        },
+        invalidateOnRefresh: true,
+      })
     }, root)
+
     return () => context.revert()
-  }, [reduced])
+  }, [reduced, serviceList])
 
   return (
     <section className="services section" id="services" ref={root} aria-labelledby="services-title">
@@ -100,7 +186,7 @@ export function Services({ onSelectService }: Props) {
             <span className="label-index">03</span>
             What we bring to the table
           </span>
-          <span className="section-top-note">Services / 01—06</span>
+          <span className="section-top-note">Services / 01—0{serviceList.length}</span>
         </div>
 
         <header className="services-head">
@@ -113,18 +199,20 @@ export function Services({ onSelectService }: Props) {
               From the first impression to the final conversion, we connect every part of your digital
               presence into a purposeful growth strategy.
             </p>
-            {/* Visual interactive preview anchor */}
-            <div className="service-ambient-preview" aria-hidden="true">
-              <span className="service-preview-tag">Capability Model / {activeService.index}</span>
-              <ServicePreviewArtwork glyph={activeService.glyph} active={true} />
-            </div>
           </div>
         </header>
 
-        <div className="services-list" onMouseLeave={() => setActiveService(SERVICES[0])}>
-          {SERVICES.map((service) => (
+        <div
+          className="services-list"
+          ref={listRef}
+          onMouseLeave={() => {
+            const current = serviceList[scrollActiveIndexRef.current]
+            if (current) setActiveService(current)
+          }}
+        >
+          {serviceList.map((service) => (
             <ServiceRow
-              key={service.index}
+              key={service.index || service.title}
               service={service}
               active={activeService.index === service.index}
               onHover={() => setActiveService(service)}

@@ -21,6 +21,8 @@ import { OverviewTab } from './OverviewTab'
 import { LeadsTab } from './LeadsTab'
 import { FinanceTab } from './FinanceTab'
 import { PerformanceTab } from './PerformanceTab'
+import { CMSTab } from './cms/CMSTab'
+import { AdminCustomSelect } from './AdminCustomSelect'
 
 export function AdminPanel() {
   const [activeTab, setActiveTab] = useState<AdminTab>('overview')
@@ -98,10 +100,10 @@ export function AdminPanel() {
       email: leadForm.email,
       company: leadForm.company || 'Private Client',
       service: leadForm.service,
-      details: leadForm.details || 'Manually entered through admin console.',
-      status: 'New',
       estimatedValue: Number(leadForm.estimatedValue) || 10000,
+      status: 'New',
       priority: leadForm.priority,
+      details: leadForm.details || 'Direct inbound inquiry.',
       notes: leadForm.notes,
     })
 
@@ -117,14 +119,14 @@ export function AdminPanel() {
       details: '',
       notes: '',
     })
-    showToast('New lead created successfully')
+    showToast('Client inquiry recorded in pipeline')
   }
 
   // Invoice handlers
   const handleUpdateInvoiceStatus = (id: string, status: InvoiceStatus) => {
     updateInvoiceStatus(id, status)
     setInvoices(getInvoices())
-    showToast(`Invoice status marked as ${status}`)
+    showToast(`Invoice status updated to ${status}`)
   }
 
   const handleDeleteInvoice = (id: string) => {
@@ -141,9 +143,9 @@ export function AdminPanel() {
 
     addInvoice({
       client: invoiceForm.client,
-      company: invoiceForm.company || invoiceForm.client,
+      company: invoiceForm.company || 'Private Client',
       service: invoiceForm.service,
-      amount: Number(invoiceForm.amount) || 0,
+      amount: Number(invoiceForm.amount) || 5000,
       issueDate: new Date().toISOString().slice(0, 10),
       dueDate: invoiceForm.dueDate,
       status: invoiceForm.status,
@@ -167,12 +169,7 @@ export function AdminPanel() {
   const newLeadsCount = leads.filter((l) => l.status === 'New').length
 
   return (
-    <div className="min-h-screen bg-[#080909] text-[#F3F1E9] font-sans selection:bg-[#D6F36A] selection:text-[#080909]">
-      {/* Background Subtle Atmosphere */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-40">
-        <div className="absolute -top-[300px] left-1/2 -translate-x-1/2 w-[900px] h-[500px] rounded-full bg-[#D6F36A]/5 blur-[120px]" />
-      </div>
-
+    <div className="min-h-screen bg-[#090A09] text-[#EAEAE3] font-sans selection:bg-[#D7F56B] selection:text-[#090A09]">
       <div className="relative z-10 flex flex-col min-h-screen">
         {/* Navigation Bar */}
         <AdminHeader
@@ -183,7 +180,7 @@ export function AdminPanel() {
         />
 
         {/* Content Area */}
-        <main className="flex-1 max-w-[1440px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <main className="flex-1 max-w-[1440px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           {activeTab === 'overview' && (
             <OverviewTab
               leads={leads}
@@ -214,18 +211,20 @@ export function AdminPanel() {
           )}
 
           {activeTab === 'performance' && <PerformanceTab />}
+
+          {activeTab === 'cms' && <CMSTab onShowToast={showToast} />}
         </main>
 
         {/* Admin Footer */}
-        <footer className="border-t border-white/[0.06] py-5 text-center text-xs text-[#6E716B]">
-          <div className="max-w-[1440px] mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-            <div>
-              <span>LeadLoom Administrative Operations Suite</span>
-              <span className="mx-2">•</span>
-              <span className="text-[#A6A79F]">Restricted Access Route (/adminpanel)</span>
+        <footer className="border-t border-[#292B26] py-4 text-xs text-[#777970] bg-[#090A09]">
+          <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <span className="text-[#A3A49A] font-medium">ANTARA Operations Suite</span>
+              <span className="text-[#292B26]">•</span>
+              <span className="text-[#777970]">Internal Route (/adminpanel)</span>
             </div>
-            <div className="font-mono text-[11px] text-[#A6A79F]">
-              LeadLoom Digital Agency © {new Date().getFullYear()}
+            <div className="font-mono text-[11px] text-[#777970]">
+              ANTARA Digital Agency © {new Date().getFullYear()}
             </div>
           </div>
         </footer>
@@ -233,132 +232,131 @@ export function AdminPanel() {
 
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-[#181A18] text-[#F3F1E9] border border-[#D6F36A]/40 px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2.5 text-xs font-medium animate-fadeIn">
-          <span className="w-2 h-2 rounded-full bg-[#D6F36A]" />
+        <div className="fixed bottom-6 right-6 z-50 bg-[#151713] text-[#EAEAE3] border border-[#292B26] px-3.5 py-2.5 rounded-md shadow-xl flex items-center gap-2.5 text-xs font-medium animate-fadeIn">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#D7F56B]" />
           <span>{toastMessage}</span>
         </div>
       )}
 
       {/* Modal: Create New Lead */}
       {showNewLeadModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-[#111311] border border-white/15 rounded-2xl w-full max-w-lg p-6 space-y-4 shadow-2xl relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs animate-fadeIn">
+          <div className="bg-[#10120F] border border-[#292B26] rounded-lg w-full max-w-lg p-5 sm:p-6 space-y-4 shadow-2xl relative">
             <button
               type="button"
               onClick={() => setShowNewLeadModal(false)}
-              className="absolute top-5 right-5 text-[#A6A79F] hover:text-[#F3F1E9] p-1 rounded-lg"
+              className="absolute top-4 right-4 text-[#777970] hover:text-[#EAEAE3] p-1 rounded transition-colors text-sm"
+              title="Close"
             >
               ✕
             </button>
 
             <div>
-              <h2 className="text-xl font-serif text-[#F3F1E9]">Record New Client Opportunity</h2>
-              <p className="text-xs text-[#A6A79F] mt-0.5">
-                Add an inbound enquiry or phone referral to the active pipeline.
+              <h2 className="text-base sm:text-lg font-semibold text-[#EAEAE3] tracking-tight">Record New Client Opportunity</h2>
+              <p className="text-xs text-[#A3A49A] mt-0.5">
+                Add an inbound inquiry or referral to the active pipeline.
               </p>
             </div>
 
             <form onSubmit={handleCreateLead} className="space-y-3.5 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[#A6A79F] mb-1 font-mono uppercase text-[10px]">Contact Name *</label>
+                  <label className="block text-[#777970] mb-1 font-mono uppercase text-[10px]">Contact Name *</label>
                   <input
                     type="text"
                     required
                     value={leadForm.name}
                     onChange={(e) => setLeadForm({ ...leadForm, name: e.target.value })}
                     placeholder="e.g. Rachel Adams"
-                    className="w-full bg-[#181A18] border border-white/10 rounded-lg p-2.5 text-[#F3F1E9] focus:outline-none focus:border-[#D6F36A]/50"
+                    className="w-full bg-[#151713] border border-[#292B26] rounded-md p-2 text-[#EAEAE3] focus:outline-none focus:border-[#D7F56B]/60 focus:ring-1 focus:ring-[#D7F56B]/20 transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-[#A6A79F] mb-1 font-mono uppercase text-[10px]">Work Email *</label>
+                  <label className="block text-[#777970] mb-1 font-mono uppercase text-[10px]">Work Email *</label>
                   <input
                     type="email"
                     required
                     value={leadForm.email}
                     onChange={(e) => setLeadForm({ ...leadForm, email: e.target.value })}
                     placeholder="e.g. rachel@domain.com"
-                    className="w-full bg-[#181A18] border border-white/10 rounded-lg p-2.5 text-[#F3F1E9] focus:outline-none focus:border-[#D6F36A]/50"
+                    className="w-full bg-[#151713] border border-[#292B26] rounded-md p-2 text-[#EAEAE3] focus:outline-none focus:border-[#D7F56B]/60 focus:ring-1 focus:ring-[#D7F56B]/20 transition-all"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[#A6A79F] mb-1 font-mono uppercase text-[10px]">Company Name</label>
+                  <label className="block text-[#777970] mb-1 font-mono uppercase text-[10px]">Company Name</label>
                   <input
                     type="text"
                     value={leadForm.company}
                     onChange={(e) => setLeadForm({ ...leadForm, company: e.target.value })}
                     placeholder="e.g. Apex BioTech"
-                    className="w-full bg-[#181A18] border border-white/10 rounded-lg p-2.5 text-[#F3F1E9] focus:outline-none focus:border-[#D6F36A]/50"
+                    className="w-full bg-[#151713] border border-[#292B26] rounded-md p-2 text-[#EAEAE3] focus:outline-none focus:border-[#D7F56B]/60 focus:ring-1 focus:ring-[#D7F56B]/20 transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-[#A6A79F] mb-1 font-mono uppercase text-[10px]">Service Area</label>
-                  <select
+                  <label className="block text-[#777970] mb-1 font-mono uppercase text-[10px]">Service Area</label>
+                  <AdminCustomSelect
                     value={leadForm.service}
-                    onChange={(e) => setLeadForm({ ...leadForm, service: e.target.value })}
-                    className="w-full bg-[#181A18] border border-white/10 rounded-lg p-2.5 text-[#F3F1E9] focus:outline-none focus:border-[#D6F36A]/50"
-                  >
-                    {SERVICES.map((s) => (
-                      <option key={s.index} value={s.shortTitle}>
-                        {s.shortTitle}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(val) => setLeadForm({ ...leadForm, service: val })}
+                    variant="full"
+                    options={SERVICES.map((s) => ({ label: s.shortTitle, value: s.shortTitle }))}
+                    ariaLabel="Select Service Area"
+                  />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[#A6A79F] mb-1 font-mono uppercase text-[10px]">Estimated Deal Value ($)</label>
+                  <label className="block text-[#777970] mb-1 font-mono uppercase text-[10px]">Estimated Deal Value ($)</label>
                   <input
                     type="number"
                     min="1000"
                     step="500"
                     value={leadForm.estimatedValue}
                     onChange={(e) => setLeadForm({ ...leadForm, estimatedValue: Number(e.target.value) })}
-                    className="w-full bg-[#181A18] border border-white/10 rounded-lg p-2.5 text-[#F3F1E9] font-mono focus:outline-none focus:border-[#D6F36A]/50"
+                    className="w-full bg-[#151713] border border-[#292B26] rounded-md p-2 text-[#EAEAE3] font-mono focus:outline-none focus:border-[#D7F56B]/60 focus:ring-1 focus:ring-[#D7F56B]/20 transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-[#A6A79F] mb-1 font-mono uppercase text-[10px]">Priority</label>
-                  <select
+                  <label className="block text-[#777970] mb-1 font-mono uppercase text-[10px]">Priority</label>
+                  <AdminCustomSelect
                     value={leadForm.priority}
-                    onChange={(e) => setLeadForm({ ...leadForm, priority: e.target.value as LeadPriority })}
-                    className="w-full bg-[#181A18] border border-white/10 rounded-lg p-2.5 text-[#F3F1E9] focus:outline-none focus:border-[#D6F36A]/50"
-                  >
-                    <option value="High">High Priority</option>
-                    <option value="Medium">Medium Priority</option>
-                    <option value="Low">Low Priority</option>
-                  </select>
+                    onChange={(val) => setLeadForm({ ...leadForm, priority: val as LeadPriority })}
+                    variant="full"
+                    options={[
+                      { label: 'High Priority', value: 'High' },
+                      { label: 'Medium Priority', value: 'Medium' },
+                      { label: 'Low Priority', value: 'Low' },
+                    ]}
+                    ariaLabel="Select Priority"
+                  />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[#A6A79F] mb-1 font-mono uppercase text-[10px]">Project Scope & Details</label>
+                <label className="block text-[#777970] mb-1 font-mono uppercase text-[10px]">Project Scope & Details</label>
                 <textarea
                   rows={2}
                   value={leadForm.details}
                   onChange={(e) => setLeadForm({ ...leadForm, details: e.target.value })}
                   placeholder="Summary of goals, requirements, or scope..."
-                  className="w-full bg-[#181A18] border border-white/10 rounded-lg p-2.5 text-[#F3F1E9] focus:outline-none focus:border-[#D6F36A]/50"
+                  className="w-full bg-[#151713] border border-[#292B26] rounded-md p-2 text-[#EAEAE3] focus:outline-none focus:border-[#D7F56B]/60 focus:ring-1 focus:ring-[#D7F56B]/20 transition-all"
                 />
               </div>
 
-              <div className="pt-2 flex items-center justify-end gap-2 border-t border-white/[0.08]">
+              <div className="pt-2 flex items-center justify-end gap-2 border-t border-[#292B26]">
                 <button
                   type="button"
                   onClick={() => setShowNewLeadModal(false)}
-                  className="px-4 py-2 rounded-lg text-xs text-[#A6A79F] hover:text-[#F3F1E9]"
+                  className="px-3.5 py-2 rounded-md text-xs text-[#A3A49A] hover:text-[#EAEAE3] transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-lg text-xs font-semibold bg-[#D6F36A] text-[#080909] hover:bg-[#c4d957] transition-all"
+                  className="px-4 py-2 rounded-md text-xs font-semibold bg-[#D7F56B] text-[#090A09] hover:bg-[#c9e85e] transition-colors shadow-sm"
                 >
                   Create Opportunity
                 </button>
@@ -370,19 +368,20 @@ export function AdminPanel() {
 
       {/* Modal: Create New Invoice */}
       {showNewInvoiceModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-[#111311] border border-white/15 rounded-2xl w-full max-w-lg p-6 space-y-4 shadow-2xl relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs animate-fadeIn">
+          <div className="bg-[#10120F] border border-[#292B26] rounded-lg w-full max-w-lg p-5 sm:p-6 space-y-4 shadow-2xl relative">
             <button
               type="button"
               onClick={() => setShowNewInvoiceModal(false)}
-              className="absolute top-5 right-5 text-[#A6A79F] hover:text-[#F3F1E9] p-1 rounded-lg"
+              className="absolute top-4 right-4 text-[#777970] hover:text-[#EAEAE3] p-1 rounded transition-colors text-sm"
+              title="Close"
             >
               ✕
             </button>
 
             <div>
-              <h2 className="text-xl font-serif text-[#F3F1E9]">Issue New Invoice</h2>
-              <p className="text-xs text-[#A6A79F] mt-0.5">
+              <h2 className="text-base sm:text-lg font-semibold text-[#EAEAE3] tracking-tight">Issue New Invoice</h2>
+              <p className="text-xs text-[#A3A49A] mt-0.5">
                 Generate an invoice for client retainers, project milestones, or audits.
               </p>
             </div>
@@ -390,43 +389,43 @@ export function AdminPanel() {
             <form onSubmit={handleCreateInvoice} className="space-y-3.5 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[#A6A79F] mb-1 font-mono uppercase text-[10px]">Client / Contact *</label>
+                  <label className="block text-[#777970] mb-1 font-mono uppercase text-[10px]">Client / Contact *</label>
                   <input
                     type="text"
                     required
                     value={invoiceForm.client}
                     onChange={(e) => setInvoiceForm({ ...invoiceForm, client: e.target.value })}
                     placeholder="e.g. Liam Gallagher"
-                    className="w-full bg-[#181A18] border border-white/10 rounded-lg p-2.5 text-[#F3F1E9] focus:outline-none focus:border-[#D6F36A]/50"
+                    className="w-full bg-[#151713] border border-[#292B26] rounded-md p-2 text-[#EAEAE3] focus:outline-none focus:border-[#D7F56B]/60 focus:ring-1 focus:ring-[#D7F56B]/20 transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-[#A6A79F] mb-1 font-mono uppercase text-[10px]">Company / Entity</label>
+                  <label className="block text-[#777970] mb-1 font-mono uppercase text-[10px]">Company / Entity</label>
                   <input
                     type="text"
                     value={invoiceForm.company}
                     onChange={(e) => setInvoiceForm({ ...invoiceForm, company: e.target.value })}
                     placeholder="e.g. Arcadian Spirits"
-                    className="w-full bg-[#181A18] border border-white/10 rounded-lg p-2.5 text-[#F3F1E9] focus:outline-none focus:border-[#D6F36A]/50"
+                    className="w-full bg-[#151713] border border-[#292B26] rounded-md p-2 text-[#EAEAE3] focus:outline-none focus:border-[#D7F56B]/60 focus:ring-1 focus:ring-[#D7F56B]/20 transition-all"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[#A6A79F] mb-1 font-mono uppercase text-[10px]">Deliverable Description</label>
+                <label className="block text-[#777970] mb-1 font-mono uppercase text-[10px]">Deliverable Description</label>
                 <input
                   type="text"
                   required
                   value={invoiceForm.service}
                   onChange={(e) => setInvoiceForm({ ...invoiceForm, service: e.target.value })}
                   placeholder="e.g. Website & Conversion Sprint Phase 1"
-                  className="w-full bg-[#181A18] border border-white/10 rounded-lg p-2.5 text-[#F3F1E9] focus:outline-none focus:border-[#D6F36A]/50"
+                  className="w-full bg-[#151713] border border-[#292B26] rounded-md p-2 text-[#EAEAE3] focus:outline-none focus:border-[#D7F56B]/60 focus:ring-1 focus:ring-[#D7F56B]/20 transition-all"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-[#A6A79F] mb-1 font-mono uppercase text-[10px]">Amount ($) *</label>
+                  <label className="block text-[#777970] mb-1 font-mono uppercase text-[10px]">Amount ($) *</label>
                   <input
                     type="number"
                     min="100"
@@ -434,44 +433,46 @@ export function AdminPanel() {
                     required
                     value={invoiceForm.amount}
                     onChange={(e) => setInvoiceForm({ ...invoiceForm, amount: Number(e.target.value) })}
-                    className="w-full bg-[#181A18] border border-white/10 rounded-lg p-2.5 text-[#F3F1E9] font-mono focus:outline-none focus:border-[#D6F36A]/50"
+                    className="w-full bg-[#151713] border border-[#292B26] rounded-md p-2 text-[#EAEAE3] font-mono focus:outline-none focus:border-[#D7F56B]/60 focus:ring-1 focus:ring-[#D7F56B]/20 transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-[#A6A79F] mb-1 font-mono uppercase text-[10px]">Due Date</label>
+                  <label className="block text-[#777970] mb-1 font-mono uppercase text-[10px]">Due Date</label>
                   <input
                     type="date"
                     required
                     value={invoiceForm.dueDate}
                     onChange={(e) => setInvoiceForm({ ...invoiceForm, dueDate: e.target.value })}
-                    className="w-full bg-[#181A18] border border-white/10 rounded-lg p-2.5 text-[#F3F1E9] font-mono focus:outline-none focus:border-[#D6F36A]/50"
+                    className="w-full bg-[#151713] border border-[#292B26] rounded-md p-2 text-[#EAEAE3] font-mono focus:outline-none focus:border-[#D7F56B]/60 focus:ring-1 focus:ring-[#D7F56B]/20 transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-[#A6A79F] mb-1 font-mono uppercase text-[10px]">Status</label>
-                  <select
+                  <label className="block text-[#777970] mb-1 font-mono uppercase text-[10px]">Status</label>
+                  <AdminCustomSelect
                     value={invoiceForm.status}
-                    onChange={(e) => setInvoiceForm({ ...invoiceForm, status: e.target.value as InvoiceStatus })}
-                    className="w-full bg-[#181A18] border border-white/10 rounded-lg p-2.5 text-[#F3F1E9] focus:outline-none focus:border-[#D6F36A]/50"
-                  >
-                    <option value="Pending">Pending</option>
-                    <option value="Paid">Paid</option>
-                    <option value="Overdue">Overdue</option>
-                  </select>
+                    onChange={(val) => setInvoiceForm({ ...invoiceForm, status: val as InvoiceStatus })}
+                    variant="full"
+                    options={[
+                      { label: 'Pending', value: 'Pending' },
+                      { label: 'Paid', value: 'Paid' },
+                      { label: 'Overdue', value: 'Overdue' },
+                    ]}
+                    ariaLabel="Select Invoice Status"
+                  />
                 </div>
               </div>
 
-              <div className="pt-2 flex items-center justify-end gap-2 border-t border-white/[0.08]">
+              <div className="pt-2 flex items-center justify-end gap-2 border-t border-[#292B26]">
                 <button
                   type="button"
                   onClick={() => setShowNewInvoiceModal(false)}
-                  className="px-4 py-2 rounded-lg text-xs text-[#A6A79F] hover:text-[#F3F1E9]"
+                  className="px-3.5 py-2 rounded-md text-xs text-[#A3A49A] hover:text-[#EAEAE3] transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-lg text-xs font-semibold bg-[#D6F36A] text-[#080909] hover:bg-[#c4d957] transition-all"
+                  className="px-4 py-2 rounded-md text-xs font-semibold bg-[#D7F56B] text-[#090A09] hover:bg-[#c9e85e] transition-colors shadow-sm"
                 >
                   Save & Issue Invoice
                 </button>

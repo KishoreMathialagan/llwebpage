@@ -17,10 +17,13 @@ export function Hero({ ready }: { ready: boolean }) {
 
     const context = gsap.context(() => {
       if (reduced) {
-        gsap.set(['.hero-label', '.hero-title .line-inner', '.hero-bottom > *', '.hero-side', '.hero-scroll'], {
-          opacity: 1,
-          y: 0,
-        })
+        gsap.set(
+          ['.hero-label', '.hero-topline-right', '.hero-title .line-inner', '.hero-reveal'],
+          {
+            opacity: 1,
+            y: 0,
+          },
+        )
         return
       }
 
@@ -41,17 +44,10 @@ export function Hero({ ready }: { ready: boolean }) {
         .fromTo('.hero-title .hero-period', { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.55, ease: 'back.out(1.7)' }, 0.85)
         // 4. CTA & actions fade and glide into place
         .fromTo(
-          '.hero-bottom .hero-reveal',
+          '.hero-reveal',
           { opacity: 0, y: 22 },
           { opacity: 1, y: 0, duration: 0.95, stagger: 0.12, ease: 'power2.out' },
           0.65,
-        )
-        // 5 & 6. Supporting layout markers and side signatures settle
-        .fromTo(
-          '.hero-side, .hero-scroll, .hero-meta-line',
-          { opacity: 0 },
-          { opacity: 1, duration: 1.1, stagger: 0.1 },
-          0.9,
         )
     }, root)
 
@@ -82,34 +78,36 @@ export function Hero({ ready }: { ready: boolean }) {
           </p>
         </div>
 
-        <h1 className="hero-title" id="hero-title">
-          <span className="line">
-            <span className="line-inner">Make Your Brand</span>
-          </span>
-          <span className="line line-serif">
-            <span className="line-inner"><em>Impossible</em> to</span>
-          </span>
-          <span className="line">
-            <span className="line-inner">Ignore<span className="hero-period">.</span></span>
-          </span>
-        </h1>
-
-        <div className="hero-bottom">
-          <div className="hero-actions hero-reveal">
-            <a className="btn btn-primary" href="#contact" data-cursor="cta">
-              <span>Start a Conversation</span>
-              <span className="btn-arrow">
-                <ArrowUpRight />
+        <div className="hero-main">
+          <div className="hero-content-left">
+            <h1 className="hero-title" id="hero-title">
+              <span className="line">
+                <span className="line-inner">Make Your Brand</span>
               </span>
-            </a>
-            <button
-              type="button"
-              className="link-arrow hero-secondary"
-              onClick={() => scrollToId('services')}
-            >
-              Explore Our Approach
-              <ArrowUpRight />
-            </button>
+              <span className="line line-serif">
+                <span className="line-inner"><em>Impossible</em> to</span>
+              </span>
+              <span className="line">
+                <span className="line-inner">Ignore<span className="hero-period">.</span></span>
+              </span>
+            </h1>
+
+            <div className="hero-actions hero-reveal">
+              <a className="btn btn-primary" href="#contact" data-cursor="cta">
+                <span>Start a Conversation</span>
+                <span className="btn-arrow">
+                  <ArrowUpRight />
+                </span>
+              </a>
+              <button
+                type="button"
+                className="link-arrow hero-secondary"
+                onClick={() => scrollToId('services')}
+              >
+                Explore Our Approach
+                <ArrowUpRight />
+              </button>
+            </div>
           </div>
 
           <div className="hero-aside hero-reveal">
@@ -117,29 +115,9 @@ export function Hero({ ready }: { ready: boolean }) {
               We bring strategy, creativity and digital intelligence together to help ambitious
               businesses attract attention, build connections and grow.
             </p>
-            <div className="hero-meta-line">
-              <span>Growth is not accidental</span>
-              <span className="hero-meta-dot" aria-hidden="true" />
-              <span>It&rsquo;s engineered</span>
-            </div>
           </div>
         </div>
       </div>
-
-      <div className="hero-side" aria-hidden="true">
-        <span className="hero-side-line" />
-        <span>Turning attention into opportunity</span>
-      </div>
-
-      <button
-        type="button"
-        className="hero-scroll"
-        onClick={() => scrollToId('about')}
-        aria-label="Scroll to the LeadLoom approach"
-      >
-        <span className="hero-scroll-track" aria-hidden="true"><i /></span>
-        <span>Scroll to explore</span>
-      </button>
     </section>
   )
 }

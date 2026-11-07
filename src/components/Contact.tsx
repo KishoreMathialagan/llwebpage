@@ -2,7 +2,9 @@ import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { gsap } from '../lib/gsap'
 import { useReducedMotion } from '../hooks/useReducedMotion'
 import { SERVICES, SITE } from '../data/content'
+import { getPublishedCMSServices } from '../lib/cmsStorage'
 import { ArrowUpRight } from './Icons'
+import { CustomSelect } from './CustomSelect'
 import { addLead } from '../lib/adminStorage'
 
 const FORM_ENDPOINT = (import.meta.env.VITE_FORM_ENDPOINT as string | undefined)?.trim() || ''
@@ -25,11 +27,6 @@ const EMPTY_FIELDS: Fields = {
   details: '',
 }
 
-const SERVICE_OPTIONS = [
-  ...SERVICES.map((service) => service.shortTitle),
-  'A few of these',
-  'Not sure yet',
-]
 
 function validateField(field: FieldName, values: Fields): string {
   const value = values[field].trim()
@@ -68,6 +65,22 @@ export function Contact({ incomingService }: Props) {
   const [values, setValues] = useState<Fields>(EMPTY_FIELDS)
   const [errors, setErrors] = useState<Partial<Record<FieldName, string>>>({})
   const [status, setStatus] = useState<Status>({ kind: 'idle' })
+  const [serviceOptions, setServiceOptions] = useState<string[]>(() => {
+    const published = getPublishedCMSServices()
+    const titles = published.length ? published.map((s) => s.shortTitle) : SERVICES.map((s) => s.shortTitle)
+    return ['Select a service', ...titles, 'A few of these', 'Not sure yet']
+  })
+
+  // Synchronize options reactively with CMS changes
+  useEffect(() => {
+    const handleCMSChange = () => {
+      const published = getPublishedCMSServices()
+      const titles = published.length ? published.map((s) => s.shortTitle) : SERVICES.map((s) => s.shortTitle)
+      setServiceOptions(['Select a service', ...titles, 'A few of these', 'Not sure yet'])
+    }
+    window.addEventListener('leadloom-cms-change', handleCMSChange)
+    return () => window.removeEventListener('leadloom-cms-change', handleCMSChange)
+  }, [])
 
   useEffect(() => {
     if (!incomingService) return
@@ -176,7 +189,7 @@ export function Contact({ incomingService }: Props) {
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify({
           ...values,
-          source: 'leadloom.com — project enquiry',
+          source: 'antara.com — project enquiry',
         }),
       })
 
@@ -197,17 +210,10 @@ export function Contact({ incomingService }: Props) {
   }
 
   return (
-    <section className="contact section" id="contact" ref={root} aria-labelledby="contact-title">
+    <section className="contact section" id="contact" ref={root} data-cursor-theme="lime" aria-labelledby="contact-title">
       <div className="contact-atmosphere" aria-hidden="true">
         <div className="contact-glow" />
-        <svg className="contact-orbits" viewBox="0 0 1100 1100" fill="none">
-          <ellipse className="contact-orbit contact-orbit-1" cx="550" cy="550" rx="470" ry="188" stroke="#D6F36A" strokeOpacity="0.22" />
-          <ellipse className="contact-orbit contact-orbit-2" cx="550" cy="550" rx="430" ry="270" stroke="#F3F1E9" strokeOpacity="0.1" transform="rotate(46 550 550)" />
-          <ellipse className="contact-orbit contact-orbit-3" cx="550" cy="550" rx="330" ry="150" stroke="#D6F36A" strokeOpacity="0.16" transform="rotate(-34 550 550)" />
-          <circle cx="950" cy="380" r="3.5" fill="#D6F36A" />
-          <circle cx="340" cy="880" r="2" fill="#F3F1E9" opacity="0.6" />
-        </svg>
-      </div>
+        </div>
 
       <div className="shell">
         <div className="section-top">
@@ -244,7 +250,7 @@ export function Contact({ incomingService }: Props) {
             </div>
           </div>
 
-          <form className="contact-form" onSubmit={handleSubmit} noValidate aria-describedby="contact-form-status">
+          <form className="contact-form" data-cursor-theme="dark" onSubmit={handleSubmit} noValidate aria-describedby="contact-form-status">
             <div className="form-head">
               <span className="eyebrow">Project enquiry</span>
               <span className="form-head-note">All fields marked * are required</span>
@@ -302,26 +308,18 @@ export function Contact({ incomingService }: Props) {
 
               <div className={`field ${errors.service ? 'has-error' : ''}`}>
                 <label htmlFor="contact-service">What do you need help with? <span aria-hidden="true">*</span></label>
-                <div className="select-wrap">
-                  <select
-                    id="contact-service"
-                    name="service"
-                    value={values.service}
-                    onChange={(event) => updateField('service', event.target.value)}
-                    onBlur={() => handleBlur('service')}
-                    aria-invalid={Boolean(errors.service)}
-                    aria-describedby={errors.service ? 'error-service' : undefined}
-                    required
-                  >
-                    <option value="" disabled>Select a service</option>
-                    {SERVICE_OPTIONS.map((option) => (
-                      <option key={option} value={option}>{option}</option>
-                    ))}
-                  </select>
-                  <svg viewBox="0 0 12 8" fill="none" aria-hidden="true">
-                    <path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" strokeWidth="1.2" />
-                  </svg>
-                </div>
+                <CustomSelect
+                  id="contact-service"
+                  name="service"
+                  value={values.service}
+                  placeholder="Select a service"
+                  options={serviceOptions}
+                  onChange={(val) => updateField('service', val)}
+                  onBlur={() => handleBlur('service')}
+                  error={Boolean(errors.service)}
+                  describedBy={errors.service ? 'error-service' : undefined}
+                  required
+                />
                 {errors.service && <span className="field-error" id="error-service">{errors.service}</span>}
               </div>
 
@@ -341,38 +339,38 @@ export function Contact({ incomingService }: Props) {
                 />
                 {errors.details && <span className="field-error" id="error-details">{errors.details}</span>}
               </div>
-            </div>
 
-            <div className="form-actions">
-              <button
-                type="submit"
-                className="btn btn-primary form-submit"
-                disabled={status.kind === 'submitting'}
-                data-cursor="cta"
-              >
-                <span>{status.kind === 'submitting' ? 'Sending…' : 'Send Project Brief'}</span>
-                <span className="btn-arrow"><ArrowUpRight /></span>
-              </button>
-              <p className="form-privacy">
-                Your details are only used to respond to this enquiry.
-              </p>
-            </div>
+              <div className="form-actions">
+                <button
+                  type="submit"
+                  className="btn btn-primary form-submit"
+                  disabled={status.kind === 'submitting'}
+                  data-cursor="cta"
+                >
+                  <span>{status.kind === 'submitting' ? 'Sending…' : 'Send Project Brief'}</span>
+                  <span className="btn-arrow"><ArrowUpRight /></span>
+                </button>
+                <p className="form-privacy">
+                  Your details are only used to respond to this enquiry.
+                </p>
+              </div>
 
-            <div id="contact-form-status" className={`form-status form-status-${status.kind}`} role="status" aria-live="polite">
-              {status.kind === 'success' && <p>{status.message}</p>}
-              {status.kind === 'error' && <p>{status.message}</p>}
-              {status.kind === 'manual' && (
-                <>
-                  <p>{status.message}</p>
-                  <a className="form-status-link" href={status.mailto}>
-                    Open your email app
-                    <ArrowUpRight />
-                  </a>
-                  <span className="form-status-note">
-                    Or write to <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
-                  </span>
-                </>
-              )}
+              <div id="contact-form-status" className={`form-status form-status-${status.kind}`} role="status" aria-live="polite">
+                {status.kind === 'success' && <p>{status.message}</p>}
+                {status.kind === 'error' && <p>{status.message}</p>}
+                {status.kind === 'manual' && (
+                  <>
+                    <p>{status.message}</p>
+                    <a className="form-status-link" href={status.mailto}>
+                      Open your email app
+                      <ArrowUpRight />
+                    </a>
+                    <span className="form-status-note">
+                      Or write to <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
+                    </span>
+                  </>
+                )}
+              </div>
             </div>
           </form>
         </div>

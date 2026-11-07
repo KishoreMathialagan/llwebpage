@@ -1,37 +1,10 @@
-import { useRef, useEffect } from 'react'
 import { NAV_ITEMS, SITE } from '../data/content'
 import { ArrowUpRight } from './Icons'
 import { scrollToId } from '../lib/scroll'
-import { useReducedMotion } from '../hooks/useReducedMotion'
+
+const BRAND_ITEMS = Array.from({ length: 8 }, (_, i) => i)
 
 export function Footer() {
-  const brandRef = useRef<HTMLDivElement>(null)
-  const reduced = useReducedMotion()
-
-  useEffect(() => {
-    if (reduced || !brandRef.current) return
-    const el = brandRef.current
-
-    const onPointerMove = (e: MouseEvent) => {
-      const rect = el.getBoundingClientRect()
-      const x = (e.clientX - rect.left) / rect.width - 0.5
-      const y = (e.clientY - rect.top) / rect.height - 0.5
-      el.style.transform = `translate3d(${x * 12}px, ${y * 8}px, 0)`
-    }
-
-    const onPointerLeave = () => {
-      el.style.transform = 'translate3d(0, 0, 0)'
-    }
-
-    el.addEventListener('mousemove', onPointerMove, { passive: true })
-    el.addEventListener('mouseleave', onPointerLeave)
-
-    return () => {
-      el.removeEventListener('mousemove', onPointerMove)
-      el.removeEventListener('mouseleave', onPointerLeave)
-    }
-  }, [reduced])
-
   return (
     <footer className="footer">
       <div className="shell">
@@ -74,17 +47,32 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="footer-brand" ref={brandRef} aria-hidden="true">
-          <span className="footer-brand-text">LeadLoom</span>
-          <svg className="footer-brand-mark" viewBox="0 0 120 80" fill="none">
-            <ellipse cx="60" cy="40" rx="56" ry="22" transform="rotate(-24 60 40)" stroke="rgba(214,243,106,.65)" strokeWidth="1.2" />
-            <ellipse cx="60" cy="40" rx="56" ry="22" transform="rotate(34 60 40)" stroke="rgba(243,241,233,.26)" />
-            <circle cx="106" cy="17" r="4.5" fill="#D6F36A" />
-          </svg>
+        {/* Infinite Scrolling Marquee */}
+        <div className="footer-brand" aria-hidden="true">
+          <div className="footer-marquee">
+            <div className="footer-marquee-track">
+              <div className="footer-marquee-group">
+                {BRAND_ITEMS.map((_, i) => (
+                  <span className="footer-marquee-item" key={`a-${i}`}>
+                    <span className="footer-brand-text">ANTARA</span>
+                    <span className="footer-marquee-star" aria-hidden="true">*</span>
+                  </span>
+                ))}
+              </div>
+              <div className="footer-marquee-group" aria-hidden="true">
+                {BRAND_ITEMS.map((_, i) => (
+                  <span className="footer-marquee-item" key={`b-${i}`}>
+                    <span className="footer-brand-text">ANTARA</span>
+                    <span className="footer-marquee-star" aria-hidden="true">*</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="footer-bottom">
-          <span>© 2026 LeadLoom. All rights reserved.</span>
+          <span>© {new Date().getFullYear()} ANTARA. All rights reserved.</span>
           <span className="footer-philosophy">Growth is not accidental. It&rsquo;s engineered.</span>
           <button type="button" className="footer-top-link" onClick={() => scrollToId('top')}>
             Back to top

@@ -1,87 +1,58 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#080909" />
-    <title>LeadLoom — Independent Digital Growth Agency</title>
-    <meta
-      name="description"
-      content="LeadLoom is an independent digital growth agency bringing strategy, creativity and digital intelligence together to help ambitious businesses attract attention, build connections and grow."
-    />
-    <link rel="canonical" href="https://www.leadloom.com/" />
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="LeadLoom" />
-    <meta property="og:title" content="LeadLoom — Make Your Brand Impossible to Ignore" />
-    <meta
-      property="og:description"
-      content="Strategy, creativity and digital thinking for ambitious brands. Growth is not accidental. It's engineered."
-    />
-    <meta property="og:url" content="https://www.leadloom.com/" />
-    <meta property="og:image" content="https://www.leadloom.com/og-image.png" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="LeadLoom — Independent Digital Growth Agency" />
-    <meta
-      name="twitter:description"
-      content="Turning attention into opportunity. Strategy, creativity and digital thinking for ambitious brands."
-    />
-    <meta name="twitter:image" content="https://www.leadloom.com/og-image.png" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
-    <link rel="preload" href="/fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/fonts/instrument-serif-italic.woff2" as="font" type="font/woff2" crossorigin />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>ANTARA - Independent Digital Growth Agency</title>
+  <meta name="description"
+    content="ANTARA is an independent digital growth agency bringing strategy, creativity and digital intelligence together to help ambitious businesses attract attention, build connections and grow." />
+  <meta name="theme-color" content="#080908" />
 
-    <style>
-      /* Critical: prevents any flash of un-styled content and powers the intro curtain. */
-      html { background: #080909; }
-      body { margin: 0; background: #080909; color: #F3F1E9; }
-      #loader {
-        position: fixed; inset: 0; z-index: 9999; background: #080909;
-        display: flex; align-items: center; justify-content: center;
-        transition: opacity .65s cubic-bezier(.16,1,.3,1), transform .65s cubic-bezier(.16,1,.3,1);
-      }
-      #loader.is-done { opacity: 0; transform: translateY(-1.5%); pointer-events: none; }
-      .loader-inner { display: flex; align-items: center; gap: 14px; }
-      .loader-word {
-        font-family: 'Manrope', system-ui, sans-serif; font-weight: 600;
-        font-size: clamp(20px, 2.2vw, 26px); letter-spacing: -.035em; color: #F3F1E9;
-        opacity: 0; animation: loaderWord .8s .1s cubic-bezier(.16,1,.3,1) forwards;
-      }
-      .loader-orbit { width: 26px; height: 26px; opacity: 0; animation: loaderWord .8s .02s cubic-bezier(.16,1,.3,1) forwards; overflow: visible; }
-      .loader-orbit ellipse { fill: none; stroke: #D6F36A; stroke-width: 1; }
-      .loader-orbit circle { fill: #D6F36A; }
-      .loader-orbit .o2 { stroke: rgba(243,241,233,.35); }
-      .loader-line {
-        position: absolute; left: 50%; bottom: 13vh; width: 120px; height: 1px;
-        background: rgba(255,255,255,.14); overflow: hidden; transform: translateX(-50%);
-      }
-      .loader-line i {
-        display: block; height: 100%; width: 40%; background: #D6F36A;
-        animation: loaderSweep 1.15s cubic-bezier(.65,0,.35,1) infinite;
-      }
-      .loader-meta {
-        position: absolute; left: 50%; transform: translateX(-50%); bottom: 9vh;
-        font-family: 'Manrope', system-ui, sans-serif; font-size: 9px; letter-spacing: .22em;
-        text-transform: uppercase; color: #6E716B; white-space: nowrap;
-      }
-      @keyframes loaderWord { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
-      @keyframes loaderSweep { 0% { transform: translateX(-110%); } 100% { transform: translateX(330%); } }
-      @media (prefers-reduced-motion: reduce) {
-        .loader-word, .loader-orbit { animation: none; opacity: 1; }
-        .loader-line i { animation: none; width: 100%; }
-        #loader { transition-duration: .01ms; }
-      }
-    </style>
-    <script type="application/ld+json">
+  <!-- Open Graph / Meta -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="ANTARA" />
+  <meta property="og:title" content="ANTARA — Independent Digital Growth Agency" />
+  <meta property="og:description"
+    content="Strategy, creativity and digital thinking for ambitious brands. A senior, remote-first team building digital presence that lasts." />
+  <meta property="og:image" content="https://www.antara.com/og-image.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="ANTARA — Independent Digital Growth Agency" />
+  <meta name="twitter:description" content="Strategy, creativity and digital thinking for ambitious brands." />
+  <meta name="twitter:image" content="https://www.antara.com/og-image.png" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+  <link rel="preload" href="/fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/fonts/instrument-serif-italic.woff2" as="font" type="font/woff2" crossorigin />
+
+  <style>
+    /* Critical: prevents any flash of un-styled content */
+    html {
+      background: #080908;
+    }
+
+    body {
+      margin: 0;
+      background: #080908;
+      color: #F3F1E9;
+    }
+
+    #loader {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: #080908;
+      pointer-events: none;
+    }
+  </style>
+  <script type="application/ld+json">
       {
         "@context": "https://schema.org",
         "@type": "ProfessionalService",
-        "name": "LeadLoom",
+        "name": "ANTARA",
         "description": "Independent digital growth agency combining strategy, creativity, technology and marketing intelligence.",
-        "url": "https://www.leadloom.com/",
-        "email": "hello@leadloom.com",
+        "url": "https://www.antara.com/",
+        "email": "hello@antara.com",
         "areaServed": "Worldwide",
         "knowsAbout": [
           "Digital Strategy",
@@ -94,28 +65,21 @@
         ]
       }
     </script>
-    <script type="module" crossorigin src="/assets/index-DkxXNDvK.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-BOSw8eid.css">
-  </head>
-  <body>
-    <a class="skip-link" href="#main">Skip to content</a>
-    <div id="loader" aria-hidden="true">
-      <div class="loader-inner">
-        <svg class="loader-orbit" viewBox="0 0 26 26" aria-hidden="true">
-          <ellipse cx="13" cy="13" rx="12" ry="5.5" transform="rotate(-28 13 13)" />
-          <ellipse class="o2" cx="13" cy="13" rx="12" ry="5.5" transform="rotate(38 13 13)" />
-          <circle cx="23.4" cy="7.4" r="1.6" />
-        </svg>
-        <span class="loader-word">LeadLoom</span>
-      </div>
-      <div class="loader-line" aria-hidden="true"><i></i></div>
-      <div class="loader-meta">Independent digital growth agency</div>
-    </div>
-    <noscript>
-      <style>
-        #loader { display: none; }
-      </style>
-    </noscript>
-    <div id="root"></div>
-  </body>
+  <script type="module" crossorigin src="/assets/index-BjPbKR6I.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-CZIIjZQl.css">
+</head>
+
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div id="loader" aria-hidden="true"></div>
+  <noscript>
+    <style>
+      #loader {
+        display: none;
+      }
+    </style>
+  </noscript>
+  <div id="root"></div>
+</body>
+
 </html>

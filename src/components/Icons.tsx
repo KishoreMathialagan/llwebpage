@@ -1,4 +1,7 @@
 import type { SVGProps } from 'react'
+import { Logo } from './Logo'
+
+export { Logo }
 
 export function ArrowUpRight({ className = '', ...props }: SVGProps<SVGSVGElement>) {
   return (
@@ -42,22 +45,8 @@ export function CloseIcon({ className = '' }: { className?: string }) {
 
 export function Wordmark({ className = '' }: { className?: string }) {
   return (
-    <span className={`wordmark ${className}`}>
-      LeadLoom
-      <svg className="wordmark-mark" viewBox="0 0 24 14" fill="none" aria-hidden="true">
-        <ellipse cx="12" cy="7" rx="11" ry="4.6" transform="rotate(-28 12 7)" stroke="currentColor" strokeWidth="0.9" />
-        <ellipse
-          className="wordmark-mark-secondary"
-          cx="12"
-          cy="7"
-          rx="11"
-          ry="4.6"
-          transform="rotate(36 12 7)"
-          stroke="currentColor"
-          strokeWidth="0.9"
-        />
-        <circle cx="21.2" cy="2.2" r="1.5" fill="var(--accent)" />
-      </svg>
+    <span className={`wordmark inline-flex items-center ${className}`}>
+      <Logo variant="symbol" className="h-[28px] sm:h-[32px] w-auto" title="ANTARA" />
     </span>
   )
 }

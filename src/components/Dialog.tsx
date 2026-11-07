@@ -7,14 +7,32 @@ type Props = {
   open: boolean
   onClose: () => void
   label: string
+  category?: string
   children: ReactNode
+  footer?: ReactNode
   className?: string
 }
 
-export function Dialog({ open, onClose, label, children, className = '' }: Props) {
-  const panelRef = useRef<HTMLDivElement>(null)
+export function Dialog({
+  open,
+  onClose,
+  label,
+  category,
+  children,
+  footer,
+  className = '',
+}: Props) {
+  const panelRef = useRef<HTMLElement>(null)
+  const contentRef = useRef<HTMLDivElement>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
   const titleId = useId()
+
+  // Reset scroll to top when opening or switching items
+  useEffect(() => {
+    if (open && contentRef.current) {
+      contentRef.current.scrollTop = 0
+    }
+  }, [open, label])
 
   useEffect(() => {
     if (!open) return
@@ -60,29 +78,70 @@ export function Dialog({ open, onClose, label, children, className = '' }: Props
   if (typeof document === 'undefined') return null
 
   return createPortal(
-    <div className={`dialog ${open ? 'is-open' : ''} ${className}`} aria-hidden={!open}>
+    <div
+      className={`drawer dialog ${open ? 'is-open' : ''} ${className}`}
+      aria-hidden={!open}
+    >
       <button
         type="button"
-        className="dialog-backdrop"
-        aria-label="Close dialog"
+        className="drawer-backdrop dialog-backdrop"
+        aria-label="Close drawer"
         tabIndex={-1}
         onClick={onClose}
       />
-      <div
-        className="dialog-panel"
+      <aside
+        className="drawer-panel dialog-panel"
         role="dialog"
         aria-modal="true"
         aria-label={label}
         aria-labelledby={titleId}
         ref={panelRef}
+        data-lenis-prevent="true"
       >
         <span id={titleId} className="sr-only">{label}</span>
-        <button className="dialog-close" type="button" onClick={onClose} ref={closeRef} aria-label="Close dialog">
-          <CloseIcon />
-        </button>
-        {children}
-      </div>
+
+        {/* Region A: Fixed Header */}
+        <header className="drawer-header" data-lenis-prevent="true">
+          <div className="drawer-header-meta">
+            <span className="drawer-eyebrow">{category || label}</span>
+          </div>
+          <button
+            className="drawer-close dialog-close"
+            type="button"
+            onClick={onClose}
+            ref={closeRef}
+            aria-label="Close drawer"
+          >
+            <CloseIcon />
+          </button>
+        </header>
+
+        {/* Region B: Independently Scrollable Content Body */}
+        <div
+          className="drawer-content"
+          ref={contentRef}
+          data-lenis-prevent="true"
+          onWheel={(e) => {
+            // Stop bubbling to window/Lenis to ensure native scroll works purely inside drawer
+            e.stopPropagation()
+          }}
+          onTouchMove={(e) => {
+            e.stopPropagation()
+          }}
+        >
+          {children}
+        </div>
+
+        {/* Region C: Fixed Bottom Action Footer */}
+        {footer && (
+          <footer className="drawer-footer" data-lenis-prevent="true">
+            {footer}
+          </footer>
+        )}
+      </aside>
     </div>,
     document.body,
   )
 }
+
+export { Dialog as Drawer }

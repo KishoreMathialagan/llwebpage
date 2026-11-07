@@ -7,7 +7,7 @@ import type { Project } from '../data/content'
 export function ProjectArt({ variant }: { variant: Project['art'] }) {
   if (variant === 'aurelia') {
     return (
-      <svg className="project-svg" viewBox="0 0 1000 750" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Aurelia concept identity composition">
+      <svg className="project-svg" data-cursor-theme="light" viewBox="0 0 1000 750" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Aurelia concept identity composition">
         <rect width="1000" height="750" fill="#E7E0D0" />
         <g stroke="#14150F" strokeOpacity="0.09">
           <path d="M0 150H1000M0 300H1000M0 450H1000M0 600H1000" />
